@@ -1,0 +1,286 @@
+// Copyright by André van Kammen
+// Licensed under CC BY-NC-SA 
+// https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+import { Types } from '../varstack.js';
+import { BaseVar } from '../vars/base.js';
+import log from '../core/log.js';
+import { RecordVar } from './record.js';
+
+class TableVar extends BaseVar {
+  constructor () {
+    super ();
+
+    /** @type {typeof TableVar} */ /* @ts-ignore: Don't blame ts for not getting this :) */
+    this.myProto = Reflect.getPrototypeOf(this);
+  }
+
+  /** @type {typeof BaseVar} */
+  get elementDef() {
+    // @ts-ignore: I need this to be on the inherited class, not on the base then everything would be the same
+    return this.myProto._elementDef;
+  }
+  get elementType() {
+    // @ts-ignore: I need this to be on the inherited class, not on the base then everything would be the same
+    return Types[this.myProto._elementDef.type];
+  }
+
+  get keyFieldName () {
+    return this.elementType.prototype._keyFieldName;
+  }
+
+  updateElement(ix, arrayElement) {
+  }
+
+  add(arrayElement) {
+    return this.updateElement(this.length, arrayElement);
+  }
+
+  clearRecords() {
+    this.length = 0;
+  }
+
+  element(ix) {
+    return null;
+  }
+
+  *[Symbol.iterator] () {
+    for (let ix = 0; ix< this.length; ix++) {
+      yield this.element(ix);
+    }
+  }
+
+  get length() {
+    return 0;
+  }
+
+  set length(x) {
+  }
+
+  get $v() {
+    return this
+  }
+
+  linkTables (srcTable) {
+  }
+
+  /** @param {any} srcTable */
+  set $v(srcTable) {
+    if (srcTable instanceof TableVar) {
+      if (srcTable.constructor === this.constructor) {
+        this.linkTables(srcTable);
+        return;
+      } else {
+        for (let ix = 0; ix < srcTable.length; ix++) {
+          this.updateElement(ix, srcTable.element(ix));
+        }
+        this.length = srcTable.length
+        return;
+      }
+    } else if (Array.isArray(srcTable)) {
+      for (let ix = 0; ix < srcTable.length; ix++) {
+        this.updateElement(ix, srcTable[ix]);
+      }
+      this.length = srcTable.length
+      return;
+    } else if (typeof srcTable === 'object') {
+      let ix = 0;
+      // If source is an object and out element has a keyFieldName we map it's keys and values to the records
+      let rec = new this.elementType;
+      rec.$parent = this;
+      if (rec instanceof RecordVar && rec.$keyFieldName && rec.$valueFieldName) {
+        for (let name in srcTable) {
+          if (!(name.startsWith('_'))) {
+            rec[rec.$keyFieldName].$v = name;
+            rec[rec.$valueFieldName].$v = srcTable[name];
+            this.updateElement(ix++, rec);
+          }
+        }
+        this.length = ix;
+        return;
+      } 
+    }
+    this.length = 0;
+    console.trace('Invalid table assignment ', srcTable);
+  }
+
+  // These specific functions are place here so they can be optimized later on 
+  // by making them "to the point" we can later-on turn this into api's to the server or storage
+  findFields(obj) {
+    for (let ix = 0; ix < this.length; ix++) {
+      let elem = this.element(ix); 
+      let match = true;
+      for (let key in obj) {
+        // TODO var base needs overridable compare function
+        if (elem[key].$v != obj[key]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        return elem;
+      }
+    }
+  }
+
+  find(fieldName, value) {
+    for (let ix = 0; ix < this.length; ix++) {
+      let el = this.element(ix)
+      if (el[fieldName].$v === value) {
+        return el;
+      }
+    }
+  }
+
+  /**
+   * @param {BaseVar} elementInstance - Element instance to find
+   * @returns {number}
+   */
+  findIxForElement(elementInstance) {
+    for (let ix = 0; ix < this.length; ix++) {
+      if (this.element(ix) === elementInstance) {
+        return ix;
+      }
+    }
+    return -1;
+  }
+  /**
+   * @param {String} fieldName - Element type of the array or the name of a field
+   * @param {any} value - Value to search for 
+   * @returns {number}
+   */
+  findIx(fieldName, value) {
+    for (let ix = 0; ix < this.length; ix++) {
+      // @ts-ignore
+      if (this.element(ix)[fieldName].$v === value) {
+        return ix;
+      }
+    }
+    return -1;
+  }
+}
+TableVar.elementDef = undefined;
+
+class ArrayTableVar extends TableVar {
+  constructor () {
+    super()
+  
+    this.tableChangedBound = this.tableChanged.bind(this);
+    this.array = []
+    // TODO write callback handler and use it in base and here it needs to re-use empty slots, this code does not
+    //      this event is only triggered for array changes, not contents of array
+    this._arrayChangedCallbacks = [];
+  }
+
+  tableChanged () {
+    this._valueChanged();
+  }
+
+  element(ix) {
+    return this.array[ix];
+  }
+  get length() {
+    return this.array.length;
+  }
+  set length(x) {
+    if (this.array.length !== x) {
+      // TODO cleanup of callbacks
+      this.array.length = x;
+      this.handleArrayChanged();
+    }
+  }
+
+  toJSON () {
+    return this.array;
+  }
+
+  moveUp(rec) {
+    let ix = this.array.indexOf(rec);
+    if (ix<=0) {
+      log.error('Invalid index({ix}) to move up!', { ix });
+      return;
+    }
+    let swap = this.array[ix-1];
+    this.array[ix-1] = this.array[ix];
+    this.array[ix] = swap;
+    this.handleArrayChanged();
+    // console.log('Move up ', ix, rec);
+  }  
+
+  moveDown(rec) {
+    let ix = this.array.indexOf(rec);
+    if (ix>=this.array.length-1) {
+      log.error('Invalid index({ix}) to move down!', { ix });
+      return;
+    }
+    let swap = this.array[ix+1];
+    this.array[ix+1] = this.array[ix];
+    this.array[ix] = swap;
+    this.handleArrayChanged();
+    // console.log('Move down ', ix, rec);
+  }
+
+  remove(rec) {
+    let ix = this.array.indexOf(rec);
+    this.array.splice(ix,1);
+    this.handleArrayChanged();
+    // console.log('Remove ', ix, rec);
+  }
+
+  addArrayChangeEvent (callBack) {
+    // TODO: re-use empty entries, add sequ
+    return this._arrayChangedCallbacks.push(callBack) - 1;
+  }
+
+  removeArrayChangeEvent (handle) {
+    this._arrayChangedCallbacks[handle] = null
+  }
+
+  linkTables (srcTable) {
+    if (this.array !== srcTable.array) {
+      this.array = srcTable.array;
+      this.linkedTable = null;
+      this.handleArrayChanged();
+      this.linkedTable = srcTable;
+    }
+  }
+  
+  handleArrayChanged () {
+    this.tableChanged();
+
+    for (let callBack of this._arrayChangedCallbacks) {
+      if (callBack) {
+        callBack(this);
+      }
+    }
+    if (this.linkedTable) {
+      this.linkedTable.handleArrayChanged();
+    }
+  }
+
+  toString () {
+    return JSON.stringify(this.array, null, 2);
+  }
+
+  updateElement(ix, arrayElement) {
+    let el;
+    let changed = false;
+    while (this.array.length <= ix) {
+      el = new this.elementType;
+      el.$parent = this;
+      el.$setDefinition(this.elementDef);
+      el.$addEvent(this.tableChangedBound);
+      this.array.push(el);
+      changed = true;
+    }
+    el = this.array[ix];
+    el.$v = arrayElement;
+    if (changed) {
+      this.handleArrayChanged();
+    }
+
+    return el;
+  }
+}
+
+export { TableVar, ArrayTableVar };
