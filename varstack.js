@@ -16,6 +16,7 @@ import { ArrayTableVar } from './structures/table.js';
 
 import log from './core/log.js';
 import { DurationVar } from './vars/duration.js';
+import { TimeVar } from './vars/time.js';
 
 /** @type {import('../../TS/vastack').VarStackTypes} */
 const Types = {
@@ -23,6 +24,7 @@ const Types = {
   Int: IntVar,
   Float: FloatVar,
   Duration: DurationVar,
+  Time: TimeVar,
   Bool: BoolVar,
   String: StringVar,
   addNamedType: function (name, baseType) {

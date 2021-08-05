@@ -1,19 +1,9 @@
 import { BaseDefinition } from "./base.js";
-import { FloatVar } from "./float.js";
+import { TimeVar } from "./time.js";
 
-class DurationVar extends FloatVar {
-  get $niceStr() {
-    // https://stackoverflow.com/questions/6312993/javascript-seconds-to-time-string-with-format-hhmmss
-    var date = new Date(0);
-    date.setSeconds(this._value); // specify value for SECONDS here
-    var timeString = date.toISOString().substr(11, 8);
-    return timeString;
-  }
-  // TODO: Add extra converter for setValue dat handles HH:MM:SS.ZZZ from string
-
-  toString() {
-    return this.$niceStr;
-  }
+// Duration is a special case for a time var
+// TODO: Add a string function that handles days like 3d 10 min 5 seconds or something like that
+class DurationVar extends TimeVar {
 }
 
 DurationVar.typeDefinition = new BaseDefinition();
