@@ -194,6 +194,18 @@ class ArrayTableVar extends TableVar {
     return this.array;
   }
 
+  toObject () {
+    if (this.elementType.prototype.toObject) {
+      const result = [];
+      for (const el of this.array) {
+        result.push(el.toObject());
+      }
+      return result;
+    } else {
+      return [...this.array];
+    }
+  }
+
   moveUp(rec) {
     let ix = this.array.indexOf(rec);
     if (ix<=0) {

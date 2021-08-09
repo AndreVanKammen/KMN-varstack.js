@@ -23,11 +23,29 @@ class RecordVar extends BaseVar {
     for (let fieldDef of this.$fieldDefs) {
       let fieldName = fieldDef.name;
       if (!fieldDef.noStore) {
-        result[fieldName] = this[fieldName].$v;
+        const objVar = this[fieldName];
+        result[fieldName] = objVar.$v;
       }
     }
     return result;
   }
+
+  toObject () {
+    let result = {}
+    for (let fieldDef of this.$fieldDefs) {
+      let fieldName = fieldDef.name;
+      if (!fieldDef.noStore) {
+        const objVar = this[fieldName];
+        if (objVar.toObject) {
+          result[fieldName] = objVar.toObject();
+        } else {
+          result[fieldName] = objVar.$v;
+        }
+      }
+    }
+    return result;
+  }
+
 
   toString() {
     return JSON.stringify(this, null, 2);
