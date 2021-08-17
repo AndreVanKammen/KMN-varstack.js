@@ -81,15 +81,45 @@ export class BaseVar {
   }
 
   _valueChanged () {
-    for (let callBack of this._directCallbacks) {
+    for (const callBack of this._directCallbacks) {
       if (callBack) {
         callBack(this);
       }
     }
   }
 
+  $getStoredPromise () {
+    this._storeResolvers = this._storeResolvers || [];
+    return new Promise((resolve, reject) => {
+      this._storeResolvers.push(resolve);
+    });
+  }
+
+  $storeIsPending ()  {
+  }
+
+  $storeIsFinished ()  {
+    if (this._storeResolvers) {
+      for (const resolver of this._storeResolvers) {
+        resolver();
+      }
+    }
+    this._storeResolvers = [];
+  }
+
   /** @type {import("../../../TS/data-model").AddEvent} */
   $addEvent (callBack) {
+    // re-use nulled version 
+    if (this._directCallbacks.length>512) {
+      let ix = 0;
+      for (const cb of this._directCallbacks) {
+        if (!cb) {
+          this._directCallbacks[ix] = callBack;
+          return ix;
+        }
+        ix++;
+      }
+    }
     return this._directCallbacks.push(callBack) - 1;
   }
 

@@ -3,6 +3,7 @@
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import { BaseVar } from '../vars/base.js';
+import { BlobBaseVar } from '../vars/blob-base.js';
 
 class RecordVar extends BaseVar {
   constructor() {
@@ -16,6 +17,22 @@ class RecordVar extends BaseVar {
     // @ts-ignore: Sometimes clashes with TS indexer define in record.ts
     this.changeLinks = [];
     this._recordChangedBound =  this._recordChanged.bind(this)
+  }
+
+  /**
+   * Do a callback for all the blobfields in this record
+   * @param {(name:string, v:BlobBaseVar) => void} callback 
+   */
+  $linkBlobFields(callback) {
+    for (let fieldDef of this.$fieldDefs) {
+      let fieldName = fieldDef.name;
+      if (!fieldDef.noStore) {
+        const objVar = this[fieldName];
+        if (objVar.constructor.isBlob) {
+          callback(fieldName, objVar);
+        }
+      }
+    }
   }
 
   toJSON() {
@@ -36,10 +53,12 @@ class RecordVar extends BaseVar {
       let fieldName = fieldDef.name;
       if (!fieldDef.noStore) {
         const objVar = this[fieldName];
-        if (objVar.toObject) {
-          result[fieldName] = objVar.toObject();
-        } else {
-          result[fieldName] = objVar.$v;
+        if (!objVar.constructor.isBlob) {
+          if (objVar.toObject) {
+            result[fieldName] = objVar.toObject();
+          } else {
+            result[fieldName] = objVar.$v;
+          }
         }
       }
     }

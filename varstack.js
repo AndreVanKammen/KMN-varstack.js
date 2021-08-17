@@ -17,16 +17,22 @@ import { ArrayTableVar } from './structures/table.js';
 import log from './core/log.js';
 import { DurationVar } from './vars/duration.js';
 import { TimeVar } from './vars/time.js';
+import { DateVar } from './vars/date.js';
+import { Float32ArrayVar } from './vars/float-32-array.js';
+import { BlobVar } from './vars/blob.js';
 
 /** @type {import('../../TS/vastack').VarStackTypes} */
 const Types = {
   main: undefined,
   Int: IntVar,
   Float: FloatVar,
-  Duration: DurationVar,
-  Time: TimeVar,
   Bool: BoolVar,
   String: StringVar,
+  Date: DateVar,
+  Time: TimeVar,
+  Duration: DurationVar,
+  Float32Array: Float32ArrayVar,
+  Blob: BlobVar,
   addNamedType: function (name, baseType) {
     if (Types[name]) {
       log.error('Type {name} already exists!', { name });
