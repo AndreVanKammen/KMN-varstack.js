@@ -19,7 +19,7 @@ class BlobBaseVar extends BaseVar {
 
   $getValueAsync() {
     if (this.$v) {
-      return new Promise((resolve) => resolve(this.$v));
+      return Promise.resolve(this.$v);// new Promise((resolve) => resolve(this.$v));
     } else {
       const promise =  new Promise((resolve) => {
         this._loadResolvers.push(resolve);
@@ -31,10 +31,13 @@ class BlobBaseVar extends BaseVar {
           if (value) {
             this._storeNoCallBack(value);
           }
-          for (const resolve of this._loadResolvers) {
+          const resolvers = this._loadResolvers;
+          this._loadResolvers = [];
+          this._isLoading = false;
+          for (const resolve of resolvers) {
             resolve(value);
           }
-          this._loadResolvers
+
         });
       }
       return promise;
