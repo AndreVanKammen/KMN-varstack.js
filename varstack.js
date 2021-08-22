@@ -145,7 +145,12 @@ const Types = {
               /** @type {BaseVar} */
               let value = this[privateName];
               if (!value) {
-                value = new Types[fieldDef.type]();
+                const typeClass = Types[fieldDef.type]
+                if (!typeClass) {
+                  console.error(`Unknown type "${fieldDef.type}" for field "${fieldDef.name}" in record "${name}"!`);
+                  return undefined;
+                }
+                value = new typeClass();
                 this[privateName] = value;
                 value.$setDefinition(fieldDef);
                 value.$parent = this;

@@ -1,53 +1,95 @@
 import defer from "../../KMN-utils.js/defer.js";
+import { ArrayTableVar } from "../structures/table.js";
+import { Types } from "../varstack.js";
 
-const openTasks = [];
+
+Types.addRecord('System_TaskState', {
+  nr: 'Int',
+  state: 'String',
+  lastStateTime: 'Time',
+  startTime: 'Time',
+  stopTime: 'Time',
+  id: 'String'
+});
+
+Types.addArray('System_TaskTable', 'System_TaskState');
 
 //@ts-ignore: add debug function to show position
 window.showProgress = function() {
-  let tbl = [];
-  for (let t of openTasks) {
-    tbl.push({
-      nr: t.nr, 
-      'total(ms)': t.runTime,
-      state: t._state,
-      'time(ms)': t.stateTime,
-      id:t.id
-    });
-  }
-  console.table(tbl);
+  // let tbl = [];
+  // for (let t of openTasks) {
+  //   tbl.push({
+  //     nr: t.nr, 
+  //     'total(ms)': t.runTime,
+  //     state: t._state,
+  //     'time(ms)': t.stateTime,
+  //     id:t.id
+  //   });
+  // }
+  // console.table(tbl);
+  console.table(_openTasksTable.toObject());
 }
+
+const openTasks = [];
+/** @type {ArrayTableVar} */
+let _openTasksTable = null;
+
+/**
+ * Rerturn the current last tasks list
+ * @returns {ArrayTableVar}
+ */
+export function getOpenTasksTable() {
+  if (!_openTasksTable) {
+    _openTasksTable = new Types.System_TaskTable();
+  }
+  return _openTasksTable;
+}
+
 class TaskState {
   constructor() {
-    this.startTime = performance.now();
+    this.taskIx = -1;
+    for (let ix = 0; ix < openTasks.length-1; ix++) {
+      if (!openTasks[ix]) {
+        this.taskIx = ix;
+        openTasks[this.taskIx] = this;
+        break;
+      }
+    }
+    if (this.taskIx < 0) {
+      this.taskIx = openTasks.push(this) - 1;
+    }
+
+    /** @type {ArrayTableVar} */
+    this.table = getOpenTasksTable();
+    while (this.table.length<=this.taskIx) {
+      this.table.add(new Types.System_TaskState());
+    }
+    this.stateRec = this.table.element(this.taskIx);
+
+    this.stateRec.startTime.$v = Date.now() / 1000.0;
+    this.stateRec.stopTime.$v = 0.0;
     this.state = 'starting';
     this.id = 'unkown';
     this.nr = -1;
-    openTasks.push(this);
   }
+
   set state(value) {
-    this._state = value;
-    this.lastStateTime = performance.now();
+    this.stateRec.state.$v =  value;
+    this.stateRec.lastStateTime.$v = Date.now() / 1000.0;
+  }
+
+  set id(value) {
+    this.stateRec.id.$v =  value;
+  }
+
+  set nr(value) {
+    this.stateRec.nr.$v =  value;
   }
 
   dispose() {
     this.state = 'disposing';
-    let ix = openTasks.indexOf(this);
-    if (ix>=0) {
-      openTasks.splice(ix,1);
-      // window.showProgress();
-    }
-  }
-
-  get runTime() {
-    return (performance.now() - this.startTime).toFixed(2);
-  }
-
-  get stateTime() {
-    return (performance.now() - this.lastStateTime).toFixed(2);
-  }
-
-  toString() {
-    console.log(`Running (${this.nr}) for ${this.runTime}ms, doing ${this._state} for ${this.stateTime}ms, id${this.id}`);
+    this.stateRec.stopTime.$v = Date.now() / 1000.0;
+    openTasks[this.taskIx] = null;
   }
 }
 
