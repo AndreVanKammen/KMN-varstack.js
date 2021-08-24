@@ -112,6 +112,11 @@ class RecordVar extends BaseVar {
     this._recordChangedAfterJSFinishBound();
   }
 
+  /**
+   * Links all updates in this record to another record instance
+   * @param {RecordVar} targetRecord 
+   * @returns {Array}
+   */
   $updateTo(targetRecord) {
     let linksTo = []
     for (let fieldName of this.$fieldNames) {
@@ -120,6 +125,25 @@ class RecordVar extends BaseVar {
           fieldName,
           handle: this[fieldName].$addEvent(
             x => targetRecord[fieldName].$v = x)
+        }
+      );
+    }
+    return linksTo
+  }
+
+  /**
+   * Links all updates in this record to a javascript object
+   * @param {any} targetObject 
+   * @returns {Array}
+   */
+   $updateToObject(targetObject) {
+    let linksTo = []
+    for (let fieldName of this.$fieldNames) {
+      linksTo.push(
+        {
+          fieldName,
+          handle: this[fieldName].$addEvent(
+            x => targetObject[fieldName] = x)
         }
       );
     }
