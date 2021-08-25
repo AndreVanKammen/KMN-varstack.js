@@ -143,7 +143,7 @@ class RecordVar extends BaseVar {
         {
           fieldName,
           handle: this[fieldName].$addEvent(
-            x => targetObject[fieldName] = x)
+            x => targetObject[fieldName] = x.$v)
         }
       );
     }
