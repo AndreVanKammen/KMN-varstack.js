@@ -17,8 +17,8 @@ class BlobBaseVar extends BaseVar {
   _storeNoCallBack(value) {
   }
 
-  $getValueAsync() {
-    if (this.$v) {
+  $getValueAsync(forceReload) {
+    if (this.$v && !forceReload) {
       return Promise.resolve(this.$v);// new Promise((resolve) => resolve(this.$v));
     } else {
       const promise =  new Promise((resolve) => {
