@@ -16,7 +16,8 @@ class RecordVar extends BaseVar {
 
     // @ts-ignore: Sometimes clashes with TS indexer define in record.ts
     this.changeLinks = [];
-    this._recordChangedBound =  this._recordChanged.bind(this)
+    this._recordChangedBound = this._recordChanged.bind(this);
+    this._updateRunning = false;
   }
 
   /**
@@ -119,16 +120,25 @@ class RecordVar extends BaseVar {
    */
   $updateTo(targetRecord) {
     let linksTo = []
-    for (let fieldName of this.$fieldNames) {
-      linksTo.push(
-        {
-          fieldName,
-          handle: this[fieldName].$addEvent(
-            x => targetRecord[fieldName].$v = x.$v)
-        }
-      );
+    // Protect against recursion between records
+    if (this._updateRunning) {
+      console.trace('Recursive update aborted!');
     }
-    return linksTo
+    this._updateRunning = true;
+    try {
+      for (let fieldName of this.$fieldNames) {
+        linksTo.push(
+          {
+            fieldName,
+            handle: this[fieldName].$addEvent(
+              x => targetRecord[fieldName].$v = x.$v)
+          }
+        );
+      }
+      return linksTo
+    } finally {
+      this._updateRunning = false;
+    }
   }
 
   /**
