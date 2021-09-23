@@ -20,7 +20,7 @@ class FloatVar extends BaseVar {
     if (isNaN(val) || !isFinite(val)) {
       // TODO: This can cause a stack overflow
       // this._valueChanged();
-      console.error(`Invalid value (${x}) for FloatVar`);
+      console.error(`Invalid value (${x}) for FloatVar (${this.$varDefinition?.name})`);
       return;
     }
 
