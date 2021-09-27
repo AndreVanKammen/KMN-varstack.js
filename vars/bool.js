@@ -32,6 +32,10 @@ class BoolVar extends BaseVar {
       this._valueChanged();
     }
   }
+
+  get $niceStr() {
+    return this._value ? 'yes' : 'no';
+  }
 }
 BoolVar.typeDefinition = new BaseDefinition();
 BoolVar.typeDefinition.type = 'Bool';
