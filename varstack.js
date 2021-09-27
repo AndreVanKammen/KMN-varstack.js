@@ -5,7 +5,7 @@
 
 // TODO: Clean this up, it's messy
 
-import { BaseVar } from './vars/base.js';
+import { BaseDefinition, BaseVar } from './vars/base.js';
 import { BoolVar } from './vars/bool.js';
 import { StringVar } from './vars/string.js';
 import { IntVar } from './vars/int.js';
@@ -20,6 +20,44 @@ import { TimeVar } from './vars/time.js';
 import { DateVar } from './vars/date.js';
 import { Float32ArrayVar } from './vars/float-32-array.js';
 import { BlobVar } from './vars/blob.js';
+
+const parseDefinition = function (definition, name) {
+  if (typeof definition === 'object') {
+    return definition;
+  }
+  // TODO: use a definition record, change the string stuff to definition and add more like ranges, masks, lookup etc.
+  //       This so we can always create an apropriate edit.
+  let defs = definition.split(':');
+  let definitions = defs.length <= 1 ? [] : defs[1].split(',');
+  let typeName = defs[0];
+  let typeToMake = Types[typeName];
+  if (!typeToMake) {
+    console.error(`Unknown type "${typeName}" in definition "${definition}", replaced by string!`);
+    typeToMake = Types.String;
+    typeName = "String";
+  }
+  let def = new BaseDefinition(typeToMake.typeDefinition);
+
+  def.name = name;
+  def.type = typeName;
+  
+  def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substr(6)?.split('..')?.map(x => Number.parseFloat(x)) || def.range;
+  def.step  = definitions.filter(x => x.startsWith('step>'))[0]?.substr(5) || def.step;
+  def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substr(7) || def.defVal;
+
+  def.isReadOnly = definitions.indexOf('ro') !== -1;
+  def.isKey = definitions.indexOf('key') !== -1;
+  def.isValue = definitions.indexOf('value') !== -1;
+  def.noStore = definitions.indexOf('nostore') !== -1;
+
+  def.lookup = definitions.filter(x => x.startsWith('lookup>'))[0]?.substr(7);
+  def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substr(7);
+  def.ref = definitions.filter(x => x.startsWith('ref>'))[0]?.substr(4);
+
+
+  return def;
+}
+
 
 /** @type {import('../../TS/vastack').VarStackTypes} */
 const Types = {
@@ -80,7 +118,7 @@ const Types = {
 
     for (var key in recordDef) {
       let publicName = key;
-      let fieldDef = BaseVar.parseDefinition(recordDef[publicName], publicName);
+      let fieldDef = parseDefinition(recordDef[publicName], publicName);
 
       fieldNames.push(publicName);
       fieldDefs.push(fieldDef);
@@ -100,14 +138,8 @@ const Types = {
                 const definitionVar = this.$findVar(fieldDef.defRef);
                 this[privateName+'_def'] = definitionVar;
                 const createValueVar = () => {
-                  const fieldDef2 = BaseVar.parseDefinition(definitionVar.$v, publicName);
+                  const fieldDef2 = parseDefinition(definitionVar.$v, publicName);
                   let typeToMake = Types[fieldDef2.type];
-                  if (!typeToMake) {
-                    // TODO: Make a default var string for stuff
-                    console.error('Type not found, defaulted t0 string: ', fieldDef2.type);
-                    typeToMake = Types.String;
-                    // return;
-                  }
                   let value = this[privateName];
                   let oldValue;
                   let oldCallbacks;
@@ -146,10 +178,6 @@ const Types = {
               let value = this[privateName];
               if (!value) {
                 const typeClass = Types[fieldDef.type]
-                if (!typeClass) {
-                  console.error(`Unknown type "${fieldDef.type}" for field "${fieldDef.name}" in record "${name}"!`);
-                  return undefined;
-                }
                 value = new typeClass();
                 this[privateName] = value;
                 value.$setDefinition(fieldDef);
@@ -256,12 +284,18 @@ const Types = {
   addArray: function (name, elementType) {
     let newClass = Types.addNamedType(name, ArrayTableVar);
     // newClass.constructor = ArrayTableVar.constructor;
-    let elementDef = BaseVar.parseDefinition(elementType, '');
+    let elementDef = parseDefinition(elementType, '');
 
     Types[name] = newClass;
     newClass.prototype._elementDef = elementDef;
     // newClass.constructor.elementDef = elementDef;
     return newClass;
+  },
+
+  add(type) {
+    // @ts-ignore
+    this[type.typeDefinition.type] = type;
   }
+
 }
 export { Types };

@@ -1,19 +1,25 @@
 
 let globalHashCount = 0;
 export class BaseDefinition {
-  _hash = ++globalHashCount; // Give every type definition a unique nr for hash-maps
-  name = '';
-  type = '';
-  isReadOnly = false;
-  isKey = false;
-  isValue = false;
-  noStore = false;
-  range = [0.0, 1.0];
-  step = '';
-  lookup = '';
-  ref = '';
-  defRef = '';
-  defVal = '';
+  constructor(defaults) {
+    this._hash = ++globalHashCount; // Give every type definition a unique nr for hash-maps
+    this.name = defaults?.name || '';
+    this.type = defaults?.type || '';
+
+    this.inputType = defaults?.inputType || '';
+    this.range = defaults?.range || [0.0, 1.0];
+    this.step = defaults?.step || '';
+    this.defVal = defaults?.defVal || '';
+
+    this.isReadOnly = defaults?.isReadOnly || false;
+    this.isKey = defaults?.isKey || false;
+    this.isValue = defaults?.isValue || false;
+    this.noStore = defaults?.noStore || false;
+
+    this.lookup = defaults?.lookup || '';
+    this.ref = defaults?.ref || '';
+    this.defRef = defaults?.defRef || '';
+  }
 }
 export class BaseVar {
   /** @type {((BaserVar) => void)[]} */
@@ -58,7 +64,7 @@ export class BaseVar {
   /** @type {BaseDefinition} */
   get $varDefinition() {
     // @ts-ignore: TODO use different construction for this?
-    return this._varDefinition || this.constructor.typeDefinition
+    return this._varDefinition || this.constructor.typeDefinition;
   }
 
   get $varType() {
@@ -135,32 +141,6 @@ export class BaseVar {
       this.$v = definition.defVal;
     }
   }
-}
-
-BaseVar.parseDefinition = function (definition, name) {
-  if (typeof definition === 'object') {
-    return definition;
-  }
-  // TODO: use a definition record, change the string stuff to definition and add more like ranges, masks, lookup etc.
-  //       This so we can always create an apropriate edit.
-  let defs = definition.split(':');
-  let definitions = defs.length <= 1 ? [] : defs[1].split(',');
-  let def = new BaseDefinition();
-
-  def.name = name;
-  def.type = defs[0];
-  def.isReadOnly = definitions.indexOf('ro') !== -1;
-  def.isKey = definitions.indexOf('key') !== -1;
-  def.isValue = definitions.indexOf('value') !== -1;
-  def.noStore = definitions.indexOf('nostore') !== -1;
-  def.lookup = definitions.filter(x => x.startsWith('lookup>'))[0]?.substr(7);
-  def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substr(7);
-  def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substr(7);
-  def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substr(6)?.split('..')?.map(x => Number.parseFloat(x));
-  def.step  = definitions.filter(x => x.startsWith('step>'))[0]?.substr(5);
-  def.ref = definitions.filter(x => x.startsWith('ref>'))[0]?.substr(4);
-
-  return def;
 }
 
 export class BaseBinding {

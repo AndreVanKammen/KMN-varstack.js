@@ -39,5 +39,6 @@ class BoolVar extends BaseVar {
 }
 BoolVar.typeDefinition = new BaseDefinition();
 BoolVar.typeDefinition.type = 'Bool';
+BoolVar.typeDefinition.inputType = 'checkbox';
 
 export { BoolVar };

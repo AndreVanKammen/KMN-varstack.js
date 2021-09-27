@@ -28,5 +28,6 @@ class IntVar extends BaseVar {
 
 IntVar.typeDefinition = new BaseDefinition();
 IntVar.typeDefinition.type = 'Int';
+IntVar.typeDefinition.inputType = 'number';
 
 export { IntVar };

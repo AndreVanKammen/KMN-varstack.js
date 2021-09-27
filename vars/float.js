@@ -33,5 +33,6 @@ class FloatVar extends BaseVar {
 
 FloatVar.typeDefinition = new BaseDefinition();
 FloatVar.typeDefinition.type = 'Float';
+FloatVar.typeDefinition.inputType = 'range';
 
 export { FloatVar };

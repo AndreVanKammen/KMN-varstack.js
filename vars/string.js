@@ -21,5 +21,6 @@ class StringVar extends BaseVar {
 
 StringVar.typeDefinition = new BaseDefinition();
 StringVar.typeDefinition.type = 'String';
+StringVar.typeDefinition.inputType = 'text';
 
 export { StringVar };
