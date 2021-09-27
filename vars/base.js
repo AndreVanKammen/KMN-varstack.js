@@ -8,7 +8,8 @@ export class BaseDefinition {
   isKey = false;
   isValue = false;
   noStore = false;
-  range = [0.0,1.0];
+  range = [0.0, 1.0];
+  step = '';
   lookup = '';
   ref = '';
   defRef = '';
@@ -156,6 +157,7 @@ BaseVar.parseDefinition = function (definition, name) {
   def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substr(7);
   def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substr(7);
   def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substr(6)?.split('..')?.map(x => Number.parseFloat(x));
+  def.step  = definitions.filter(x => x.startsWith('step>'))[0]?.substr(5);
   def.ref = definitions.filter(x => x.startsWith('ref>'))[0]?.substr(4);
 
   return def;
