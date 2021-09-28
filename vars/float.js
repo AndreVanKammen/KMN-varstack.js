@@ -1,6 +1,6 @@
 import { BaseDefinition, BaseVar } from './base.js';
 
-class FloatVar extends BaseVar {
+export class FloatVar extends BaseVar {
   constructor () {
     super();
     this._value = 0.0;
@@ -31,8 +31,9 @@ class FloatVar extends BaseVar {
   }
 }
 
-FloatVar.typeDefinition = new BaseDefinition();
-FloatVar.typeDefinition.type = 'Float';
-FloatVar.typeDefinition.inputType = 'range';
+FloatVar.typeDefinition = new BaseDefinition({
+  type: 'Float',
+  showValue: true,
+  inputType: 'range'
+});
 
-export { FloatVar };

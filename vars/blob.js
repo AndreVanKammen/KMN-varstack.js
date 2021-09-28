@@ -29,10 +29,20 @@ export class BlobVar extends BlobBaseVar {
       if (x) {
         console.error(`Invalid value (${x}) for BlobVar`);
       }
+      this._value = undefined;
+    }
+  }
+
+  get $niceStr() {
+    if (this._value) {
+      return (this._value?.deref()?.byteLength).toLocaleString() + 'bytes';
+    } else {
+      return 'not loaded';
     }
   }
 }
 
 BlobVar.typeDefinition = new BaseDefinition();
 BlobVar.typeDefinition.type = 'Blob';
+BlobVar.typeDefinition.isReadOnly = true;
 

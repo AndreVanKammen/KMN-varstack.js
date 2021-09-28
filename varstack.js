@@ -42,14 +42,16 @@ const parseDefinition = function (definition, name) {
   def.type = typeName;
   
   def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substr(6)?.split('..')?.map(x => Number.parseFloat(x)) || def.range;
-  def.step  = definitions.filter(x => x.startsWith('step>'))[0]?.substr(5) || def.step;
+  def.step = definitions.filter(x => x.startsWith('step>'))[0]?.substr(5) || def.step;
   def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substr(7) || def.defVal;
 
-  def.isReadOnly = definitions.indexOf('ro') !== -1;
+  def.isReadOnly = definitions.indexOf('ro') !== -1 || def.isReadOnly;
+  
   def.isKey = definitions.indexOf('key') !== -1;
   def.isValue = definitions.indexOf('value') !== -1;
   def.noStore = definitions.indexOf('nostore') !== -1;
 
+  def.inputType = definitions.filter(x => x.startsWith('input>'))[0]?.substr(6)||def.inputType;
   def.lookup = definitions.filter(x => x.startsWith('lookup>'))[0]?.substr(7);
   def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substr(7);
   def.ref = definitions.filter(x => x.startsWith('ref>'))[0]?.substr(4);

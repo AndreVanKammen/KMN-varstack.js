@@ -8,5 +8,5 @@ class DurationVar extends TimeVar {
 
 DurationVar.typeDefinition = new BaseDefinition();
 DurationVar.typeDefinition.type = 'Duration';
-
+DurationVar.typeDefinition.isReadOnly = true; // TODO make edit
 export { DurationVar };

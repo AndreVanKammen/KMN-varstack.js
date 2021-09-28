@@ -7,9 +7,10 @@ export class BaseDefinition {
     this.type = defaults?.type || '';
 
     this.inputType = defaults?.inputType || '';
-    this.range = defaults?.range || [0.0, 1.0];
+    this.range = defaults?.range;
     this.step = defaults?.step || '';
     this.defVal = defaults?.defVal || '';
+    this.showValue = defaults?.showValue || '';
 
     this.isReadOnly = defaults?.isReadOnly || false;
     this.isKey = defaults?.isKey || false;
@@ -137,6 +138,14 @@ export class BaseVar {
   /** @param {BaseDefinition} definition*/
   $setDefinition(definition) {
     this._varDefinition = definition;
+    if (definition.range && definition.range.length) {
+      let v = definition.range[0];
+      if (v < 0 && definition.range[1] > 0) {
+        this.$v = 0;
+      } else {
+        this.$v = definition.range[0];
+      }
+    }
     if (definition.defVal) {
       this.$v = definition.defVal;
     }
