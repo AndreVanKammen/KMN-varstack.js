@@ -2,7 +2,7 @@ import { BaseDefinition, BaseVar } from './base.js';
 import { BlobBaseVar } from './blob-base.js';
 
 class Float32ArrayVar extends BlobBaseVar {
-  constructor () {
+  constructor() {
     super();
     this._value = undefined;
   };
@@ -10,7 +10,7 @@ class Float32ArrayVar extends BlobBaseVar {
   /**
    * Value from storage retrieved, store here as weakref for caching
    */
-  _storeNoCallBack(val)  {
+  _storeNoCallBack(val) {
     this._value = new WeakRef(val);
   }
 
@@ -20,14 +20,14 @@ class Float32ArrayVar extends BlobBaseVar {
 
   set $v(x) {
     if (x instanceof Float32Array) {
-      if (this._value !== x) {
+      if (this._value?.deref() !== x) {
         this._value = new WeakRef(x);
         this._valueChanged();
       }
     } else if (Array.isArray(x)) {
       this._value = new WeakRef(new Float32Array(x));
       this._valueChanged();
-  } else {
+    } else {
       if (x) {
         console.error(`Invalid value (${x}) for Float32ArrayVar`);
       }
