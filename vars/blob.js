@@ -42,7 +42,10 @@ export class BlobVar extends BlobBaseVar {
   }
 }
 
-BlobVar.typeDefinition = new BaseDefinition();
-BlobVar.typeDefinition.type = 'Blob';
-BlobVar.typeDefinition.isReadOnly = true;
+BlobVar.typeDefinition = new BaseDefinition({
+  ...BlobBaseVar.typeDefinition,
+  ...{
+    type: 'Blob'
+  }
+});
 

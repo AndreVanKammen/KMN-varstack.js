@@ -1,7 +1,7 @@
 import { BaseDefinition, BaseVar } from './base.js';
 import { BlobBaseVar } from './blob-base.js';
 
-class Float32ArrayVar extends BlobBaseVar {
+export class Float32ArrayVar extends BlobBaseVar {
   constructor() {
     super();
     this._value = undefined;
@@ -35,7 +35,9 @@ class Float32ArrayVar extends BlobBaseVar {
   }
 }
 
-Float32ArrayVar.typeDefinition = new BaseDefinition();
-Float32ArrayVar.typeDefinition.type = 'Float32Array';
-
-export { Float32ArrayVar };
+Float32ArrayVar.typeDefinition = new BaseDefinition({
+  ...BlobBaseVar.typeDefinition,
+  ...{
+    type: 'Float32Array'
+  }
+});

@@ -1,7 +1,7 @@
 import log from '../core/log.js';
 import { BaseVar, BaseDefinition } from './base.js';
 
-class DateVar extends BaseVar {
+export class DateVar extends BaseVar {
   constructor () {
     super();
     this._value = new Date();
@@ -53,7 +53,6 @@ class DateVar extends BaseVar {
     return this.$niceStr;
   }
 }
-DateVar.typeDefinition = new BaseDefinition();
-DateVar.typeDefinition.type = 'Date';
-
-export { DateVar }
+DateVar.typeDefinition = new BaseDefinition({
+  type: 'Date'
+});

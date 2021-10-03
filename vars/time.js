@@ -2,7 +2,7 @@ import { secondsToTimeStr } from "../../KMN-utils.js/format.js";
 import { BaseDefinition } from "./base.js";
 import { FloatVar } from "./float.js";
 
-class TimeVar extends FloatVar {
+export class TimeVar extends FloatVar {
   get $niceStr() {
     return secondsToTimeStr(this._value);
   }
@@ -13,7 +13,10 @@ class TimeVar extends FloatVar {
   }
 }
 
-TimeVar.typeDefinition = new BaseDefinition();
-TimeVar.typeDefinition.type = 'Time';
-
-export { TimeVar };
+TimeVar.typeDefinition = new BaseDefinition(
+  {
+    ...FloatVar.typeDefinition, ...{
+      type: 'Time',
+      isReadOnly: true // TODO make edit
+    }
+  });

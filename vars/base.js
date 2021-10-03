@@ -73,7 +73,11 @@ export class BaseVar {
   }
 
   get $niceStr() {
-    return this.$v.toString()
+    if (this.$v) {
+      return this.$v.toString()
+    } else {
+      return '';
+    }
   }
 
   toJSON () {

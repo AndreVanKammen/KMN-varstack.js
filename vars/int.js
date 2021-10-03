@@ -1,7 +1,7 @@
 import log from '../core/log.js';
 import { BaseDefinition, BaseVar } from './base.js';
 
-class IntVar extends BaseVar {
+export class IntVar extends BaseVar {
   constructor () {
     super();
     this._value = ~~0;
@@ -26,8 +26,7 @@ class IntVar extends BaseVar {
   }
 }
 
-IntVar.typeDefinition = new BaseDefinition();
-IntVar.typeDefinition.type = 'Int';
-IntVar.typeDefinition.inputType = 'number';
-
-export { IntVar };
+IntVar.typeDefinition = new BaseDefinition({
+  type: 'Int',
+  inputType: 'number'
+});

@@ -1,6 +1,6 @@
 import { BaseDefinition, BaseVar } from './base.js';
 
-class StringVar extends BaseVar {
+export class StringVar extends BaseVar {
   constructor () {
     super();
     this._value = '';
@@ -19,8 +19,7 @@ class StringVar extends BaseVar {
   }
 }
 
-StringVar.typeDefinition = new BaseDefinition();
-StringVar.typeDefinition.type = 'String';
-StringVar.typeDefinition.inputType = 'text';
-
-export { StringVar };
+StringVar.typeDefinition = new BaseDefinition({
+  type: 'String',
+  inputType: 'text'
+});

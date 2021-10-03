@@ -20,6 +20,7 @@ import { TimeVar } from './vars/time.js';
 import { DateVar } from './vars/date.js';
 import { Float32ArrayVar } from './vars/float-32-array.js';
 import { BlobVar } from './vars/blob.js';
+import { EnumVar } from './vars/enum.js';
 
 const parseDefinition = function (definition, name) {
   if (typeof definition === 'object') {
@@ -73,6 +74,7 @@ const Types = {
   Duration: DurationVar,
   Float32Array: Float32ArrayVar,
   Blob: BlobVar,
+  Enum: EnumVar,
   addNamedType: function (name, baseType) {
     if (Types[name]) {
       log.error('Type {name} already exists!', { name });
@@ -100,6 +102,23 @@ const Types = {
 
     Types[name] = newClass;
     return newClass;
+  },
+
+  addEnum: function (name, enumValues) {
+    const newClass = Types.addNamedType(name, EnumVar);
+    newClass.enumValues = enumValues;
+    let enumLookUp = [];
+    for (let [key, val] of Object.entries(enumValues)) {
+      enumLookUp[val] = key;
+    }
+    newClass.enumLookUp = enumLookUp;
+    // TODO: Should do this for record and array as well to be more compatible
+    newClass.typeDefinition = new BaseDefinition({
+      ...EnumVar.typeDefinition,
+      ...{
+        type: name
+      }
+    });
   },
 
   addRecord: function (name, recordDef) {

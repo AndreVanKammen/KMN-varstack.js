@@ -1,7 +1,7 @@
 import defer from "../../KMN-utils.js/defer.js";
-import { BaseVar } from "./base.js";
+import { BaseDefinition, BaseVar } from "./base.js";
 
-class BlobBaseVar extends BaseVar {
+export class BlobBaseVar extends BaseVar {
   constructor() {
     super ();
 
@@ -46,5 +46,6 @@ class BlobBaseVar extends BaseVar {
 }
 
 BlobBaseVar.isBlob = true;
-
-export { BlobBaseVar }
+BlobBaseVar.typeDefinition = new BaseDefinition({
+  isReadOnly: true
+});

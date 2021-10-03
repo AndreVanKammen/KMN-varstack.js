@@ -1,7 +1,7 @@
 import log from '../core/log.js';
 import { BaseVar, BaseDefinition } from './base.js';
 
-class BoolVar extends BaseVar {
+export class BoolVar extends BaseVar {
   constructor () {
     super();
     this._value = false;
@@ -37,8 +37,8 @@ class BoolVar extends BaseVar {
     return this._value ? 'yes' : 'no';
   }
 }
-BoolVar.typeDefinition = new BaseDefinition();
-BoolVar.typeDefinition.type = 'Bool';
-BoolVar.typeDefinition.inputType = 'checkbox';
+BoolVar.typeDefinition = new BaseDefinition({
+  type: 'Bool',
+  inputType: 'checkbox'
+});
 
-export { BoolVar };
