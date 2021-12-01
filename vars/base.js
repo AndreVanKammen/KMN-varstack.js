@@ -74,6 +74,11 @@ export class BaseVar {
 
   get $niceStr() {
     if (this.$v != null) {
+      //@ts-ignore 
+      if (this.constructor.$formatForScreen) {
+        //@ts-ignore 
+        return this.constructor.$formatForScreen(this);
+      }
       return this.$v.toString()
     } else {
       return '';

@@ -85,10 +85,23 @@ class RecordVar extends BaseVar {
       // if (pathToValue.length>1) {
       //   debugger;
       // }
-      let value = this[pathToValue[0]];
-      for (let ix = 1; ix < pathToValue.length; ix++) {
+      let value = this;
+      for (let ix = 0; ix < pathToValue.length; ix++) {
+        let ptv = pathToValue[ix];
         if (value) {
-          value = value[pathToValue[ix]];
+          let tix = -1;
+          if (ptv.endsWith(']')) {
+            let startIx = ptv.indexOf('[');
+            if (startIx >= 0) {
+              tix = Number.parseInt(ptv.substr(startIx + 1));
+              ptv = ptv.substr(0, startIx);
+            }
+          }
+          value = value[ptv];
+          if (tix >= 0) {
+            // @ts-ignore
+            value = value.array[tix];
+          }
         }
       }
       return value;
