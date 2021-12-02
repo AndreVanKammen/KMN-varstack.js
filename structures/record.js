@@ -100,7 +100,13 @@ class RecordVar extends BaseVar {
           value = value[ptv];
           if (tix >= 0) {
             // @ts-ignore
-            value = value.array[tix];
+            if (value.keyFieldName) {
+              // @ts-ignore
+              value = value.find(value.keyFieldName, tix);
+            } else {
+              // @ts-ignore
+              value = value.array[tix];
+            }
           }
         }
       }
