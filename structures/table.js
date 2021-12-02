@@ -274,6 +274,27 @@ class ArrayTableVar extends TableVar {
     return JSON.stringify(this.array, null, 2);
   }
 
+  toJSONArray() {
+    let fieldNames = [];
+    for (let fieldDef of this.elementType.prototype._fieldDefs) {
+      let fieldName = fieldDef.name;
+      if (!fieldDef.noStore) {
+        fieldNames.push(fieldName);
+      }
+    }
+
+    let result = '[' + JSON.stringify(fieldNames);
+    for (let ix = 0; ix < this.length; ix++) {
+      let row = [];
+      let el = this.array[ix];
+      for (let fieldName of fieldNames) {
+        row.push(el[fieldName].$v);
+      }
+      result += ',\n' + JSON.stringify(row);
+    }
+    return result + ']';
+  }
+
   updateElement(ix, arrayElement) {
     let el;
     let changed = false;
