@@ -11,6 +11,7 @@ export class BaseDefinition {
     this.step = defaults?.step || '';
     this.defVal = defaults?.defVal || '';
     this.showValue = defaults?.showValue || '';
+    this.precision = isFinite(defaults?.precision) ? ~~(defaults?.precision) : 2;
 
     this.isReadOnly = defaults?.isReadOnly || false;
     this.isKey = defaults?.isKey || false;
