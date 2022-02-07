@@ -44,6 +44,7 @@ class TableVar extends BaseVar {
     return null;
   }
 
+  /** @returns {Iterator<any>} */
   *[Symbol.iterator] () {
     for (let ix = 0; ix< this.length; ix++) {
       yield this.element(ix);
