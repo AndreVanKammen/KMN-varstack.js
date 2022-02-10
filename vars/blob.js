@@ -34,8 +34,9 @@ export class BlobVar extends BlobBaseVar {
   }
 
   get $niceStr() {
-    if (this._value) {
-      return (this._value?.deref()?.byteLength).toLocaleString() + 'bytes';
+    let lengthVal = (this._value?.deref()?.byteLength);
+    if (lengthVal) {
+      return lengthVal.toLocaleString() + 'bytes';
     } else {
       return 'not loaded';
     }
