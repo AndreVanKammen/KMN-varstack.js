@@ -21,6 +21,7 @@ import { DateVar } from './vars/date.js';
 import { Float32ArrayVar } from './vars/float-32-array.js';
 import { BlobVar } from './vars/blob.js';
 import { EnumVar } from './vars/enum.js';
+import { PercentageVar } from './vars/percentage.js';
 
 const parseDefinition = function (definition, name) {
   if (typeof definition === 'object') {
@@ -73,6 +74,7 @@ const Types = {
   String: StringVar,
   Date: DateVar,
   Time: TimeVar,
+  Percentage: PercentageVar,
   Duration: DurationVar,
   Float32Array: Float32ArrayVar,
   Blob: BlobVar,
@@ -109,11 +111,15 @@ const Types = {
   addEnum: function (name, enumValues) {
     const newClass = Types.addNamedType(name, EnumVar);
     newClass.enumValues = enumValues;
+    let enumOrder = [];
     let enumLookUp = [];
+    let index = 0;
     for (let [key, val] of Object.entries(enumValues)) {
       enumLookUp[val] = key;
+      enumOrder[val] = index++;
     }
     newClass.enumLookUp = enumLookUp;
+    newClass.enumOrder = enumOrder;
     // TODO: Should do this for record and array as well to be more compatible
     newClass.typeDefinition = new BaseDefinition({
       ...EnumVar.typeDefinition,
@@ -158,6 +164,7 @@ const Types = {
             get: function () {
               let value = this[privateName];
               if (!value) {
+                // @ts-ignore
                 const definitionVar = this.$findVar(fieldDef.defRef);
                 this[privateName+'_def'] = definitionVar;
                 const createValueVar = () => {
@@ -183,6 +190,7 @@ const Types = {
                     value.$v = oldValue;
                     value._directCallbacks = oldCallbacks;
                   } else {
+                    // @ts-ignore
                     value.$addEvent(this._recordChangedBound);
                   }
                   return value;
@@ -248,6 +256,7 @@ const Types = {
                 // This code is executed once for the class
                 // it was placed here so it fires after the structure is fully created
                 if (!lookupTable || !lookupField) {
+                  // @ts-ignore
                   let current = this.$getMain();// Types.main;
                   for (let ix = 0; ix < pathTolookup.length - 1; ix++) {
                     let newCurrent = current[pathTolookup[ix]];

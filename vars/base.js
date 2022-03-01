@@ -126,8 +126,8 @@ export class BaseVar {
   }
 
   /** @type {import("../../../TS/data-model").AddEvent} */
-  $addEvent (callBack) {
-    // re-use nulled version 
+  $addEvent (callBack, initialize = false) {
+    // re-use nulled version on larger lists
     if (this._directCallbacks.length>512) {
       let ix = 0;
       for (const cb of this._directCallbacks) {
@@ -137,6 +137,9 @@ export class BaseVar {
         }
         ix++;
       }
+    }
+    if (initialize) {
+      callBack(this);
     }
     return this._directCallbacks.push(callBack) - 1;
   }
