@@ -43,7 +43,7 @@ export class DateVar extends BaseVar {
   get $niceStr() {
     if (this._value) {
       var timeString = this._value.toISOString();
-      return timeString.substr(0,10) + ' ' + timeString.substr(11,5);
+      return timeString.substring(2,10) + ' ' + timeString.substring(11,16);
     } else {
       return undefined;
     }
