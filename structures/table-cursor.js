@@ -28,11 +28,12 @@ class TableCursor {
     this._index = new Types.Int();
     this._index.$v = -1;
     this._index.$addEvent(this._indexChanged.bind(this));
-    this._lastIX = -1;
     // I want to specify that this cursorf is a BASE class not THE CLASS typescript assumes it to be
     // if I do this and errors on all the variables on the dynamicly created sub classes :(
     /** @type {RecordVar} */
     this._cursor = null;
+    /** @type {RecordVar} */
+    this._lastRec = null;
 
     if (recordTypeOrTable instanceof TableVar) {
       this.table = recordTypeOrTable;
@@ -53,12 +54,12 @@ class TableCursor {
       return;
     }
 
-    if (this._lastIX !== -1) {
-      this._table.element(this._lastIX).$clearUpdateTo(this._tableLinksTo);
+    if (this._lastRec) {
+      this._lastRec.$clearUpdateTo(this._tableLinksTo);
     }
 
     let ix = indexVar.$v;
-    this._lastIX = ix;
+    
     if (ix === -1) {
       // TODO set empty record values
       return
@@ -67,9 +68,10 @@ class TableCursor {
       log.error('Index out of bounds!', ix);
       return;
     }
+    this._lastRec = this._table.element(ix);
     this._cursor.$v = this._table.element(ix).$v;
-    this._cursorLinksTo = this._cursor.$updateTo(this._table.element(ix));
-    this._tableLinksTo = this._table.element(ix).$updateTo(this._cursor);
+    this._cursorLinksTo = this._cursor.$updateTo(this._lastRec);
+    this._tableLinksTo = this._lastRec.$updateTo(this._cursor);
   }
 
   setCursorType (recordType) {

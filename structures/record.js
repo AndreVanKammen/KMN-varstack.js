@@ -147,6 +147,9 @@ class RecordVar extends BaseVar {
     this._updateRunning = true;
     try {
       for (let fieldName of this.$fieldNames) {
+        // if (fieldName === 'channel') {
+        //   console.log('$updateToObject', this.$hash, this['audioLibrary'].name.$v);
+        // }
         linksTo.push(
           {
             fieldName,
@@ -183,6 +186,9 @@ class RecordVar extends BaseVar {
   $clearUpdateTo(linksTo) {
     if (linksTo) {
       for (let link of linksTo) {
+        // if (link.fieldName === 'channel') {
+        //   console.log('$clearUpdateTo', this.$hash, this['audioLibrary'].name.$v);
+        // }
         this[link.fieldName].$removeEvent(link.handle)
       }
       // Prevent double freeing
