@@ -110,23 +110,8 @@ const Types = {
 
   addEnum: function (name, enumValues) {
     const newClass = Types.addNamedType(name, EnumVar);
-    newClass.enumValues = enumValues;
-    let enumOrder = [];
-    let enumLookUp = [];
-    let index = 0;
-    for (let [key, val] of Object.entries(enumValues)) {
-      enumLookUp[val] = key;
-      enumOrder[val] = index++;
-    }
-    newClass.enumLookUp = enumLookUp;
-    newClass.enumOrder = enumOrder;
-    // TODO: Should do this for record and array as well to be more compatible
-    newClass.typeDefinition = new BaseDefinition({
-      ...EnumVar.typeDefinition,
-      ...{
-        type: name
-      }
-    });
+    newClass.initialize(name, enumValues);
+    return newClass;
   },
 
   addRecord: function (name, recordDef) {
@@ -190,8 +175,10 @@ const Types = {
                     value.$v = oldValue;
                     value._directCallbacks = oldCallbacks;
                   } else {
-                    // @ts-ignore
-                    value.$addEvent(this._recordChangedBound);
+                    if (!fieldDef2.noStore) {
+                      // @ts-ignore
+                      value.$addEvent(this._recordChangedBound);
+                    }
                   }
                   return value;
                 }
@@ -222,9 +209,11 @@ const Types = {
                 } else {
                   // Don't do for refs, they go off after lookup. a change of the lookup triggers
                   // a new record changed on it's own so this is also unneccesary
-                  value.$addEvent(
-                    // @ts-ignore
-                    this._recordChangedBound);
+                  if (!fieldDef.noStore) {
+                    value.$addEvent(
+                      // @ts-ignore
+                      this._recordChangedBound);
+                  }
                 }
               }
               return value;
