@@ -31,12 +31,12 @@ window.showProgress = function() {
 }
 
 const openTasks = [];
-/** @type {ArrayTableVar} */
+/** @type {import("../../../TS/data-model.js").ArrayTableVarG<any>} */
 let _openTasksTable = null;
 
 /**
  * Rerturn the current last tasks list
- * @returns {ArrayTableVar}
+ * @returns {import("../../../TS/data-model.js").ArrayTableVarG<any>}
  */
 export function getOpenTasksTable() {
   if (!_openTasksTable) {
