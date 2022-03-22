@@ -1,3 +1,6 @@
+import defer from '../../KMN-utils.js/defer.js';
+
+const deferedHandleOffset = 10000000;
 
 let globalHashCount = 0;
 export class BaseDefinition {
@@ -26,6 +29,10 @@ export class BaseDefinition {
 export class BaseVar {
   /** @type {((BaserVar) => void)[]} */
   _directCallbacks = [];
+  /** @type {((BaserVar) => void)[]} */
+  _deferedCallbacks = [];
+  _deferedSceduled = false;
+  _handleDeferedBound = this.handleDefered.bind(this);
   _hash = ++globalHashCount; // Give every object a unique nr for hash-maps
   /** @type {BaseDefinition} */
   _varDefinition = undefined;
@@ -104,6 +111,19 @@ export class BaseVar {
         callBack(this);
       }
     }
+    if (this._deferedCallbacks.length>0 && !this._deferedSceduled) {
+      this._deferedSceduled = true;
+      defer(this._handleDeferedBound);
+    }
+  }
+
+  handleDefered() {
+    this._deferedSceduled = false;
+    for (const callBack of this._deferedCallbacks) {
+      if (callBack) {
+        callBack(this);
+      }
+    }
   }
 
   $getStoredPromise () {
@@ -144,8 +164,30 @@ export class BaseVar {
     return this._directCallbacks.push(callBack) - 1;
   }
 
-  $removeEvent (handle) {
-    this._directCallbacks[handle] = null
+  $addDeferedEvent(callBack, initialize = false) {
+    // re-use nulled version on larger lists
+    if (this._deferedCallbacks.length > 512) {
+      let ix = 0;
+      for (const cb of this._deferedCallbacks) {
+        if (!cb) {
+          this._deferedCallbacks[ix] = callBack;
+          return ix;
+        }
+        ix++;
+      }
+    }
+    if (initialize) {
+      callBack(this);
+    }
+    return this._deferedCallbacks.push(callBack) - 1 + deferedHandleOffset;
+  }
+
+  $removeEvent(handle) {
+    if (handle > deferedHandleOffset) {
+      this._deferedCallbacks[handle - deferedHandleOffset] = null;
+    }else{
+      this._directCallbacks[handle] = null
+    }
   }
 
   /** @param {BaseDefinition} definition*/
