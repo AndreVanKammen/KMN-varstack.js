@@ -54,5 +54,6 @@ export class DateVar extends BaseVar {
   }
 }
 DateVar.typeDefinition = new BaseDefinition({
-  type: 'Date'
+  type: 'Date',
+  sortIsNumber: true
 });

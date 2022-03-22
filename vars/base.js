@@ -24,6 +24,8 @@ export class BaseDefinition {
     this.lookup = defaults?.lookup || '';
     this.ref = defaults?.ref || '';
     this.defRef = defaults?.defRef || '';
+
+    this.sortIsNumber = defaults?.sortIsNumber || false;
   }
 }
 export class BaseVar {
@@ -78,6 +80,10 @@ export class BaseVar {
 
   get $varType() {
     return this.$varDefinition.type
+  }
+
+  get $sortValue() {
+    return this.$v;
   }
 
   get $niceStr() {

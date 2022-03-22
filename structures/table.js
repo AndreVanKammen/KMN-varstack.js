@@ -8,11 +8,15 @@ import log from '../core/log.js';
 import { RecordVar } from './record.js';
 
 class TableVar extends BaseVar {
-  constructor () {
-    super ();
+  constructor() {
+    super();
 
     /** @type {typeof TableVar} */ /* @ts-ignore: Don't blame ts for not getting this :) */
     this.myProto = Reflect.getPrototypeOf(this);
+    this.sortField = '';
+    this.sortAscending = false;
+    this.sortInvalidated = false;
+    this.sortArray = [];
   }
 
   /** @type {typeof BaseVar} */
@@ -159,6 +163,48 @@ class TableVar extends BaseVar {
     }
     return -1;
   }
+
+  setSort(fieldName, ascending) {
+    if (this.sortField !== fieldName) {
+      this.sortField = fieldName;
+      this.sortInvalidated = true;
+    }
+    if (this.sortAscending !== ascending) {
+      this.sortAscending = ascending;
+      this.sortInvalidated = true;
+    }
+  }
+
+  getSortArray() {
+    if (this.sortInvalidated) {
+      this.sortArray = [];
+      if (this.sortField === '') {
+        for (let ix = 0; ix < this.length; ix++) {
+          this.sortArray.push(ix);
+        }
+      } else {
+        let tempArray = [];
+        for (let ix = 0; ix < this.length; ix++) {
+          let val = this.element(ix)[this.sortField].$sortValue;
+          tempArray.push({ ix, val });
+        }
+        let fieldIx = this.elementType.prototype._fieldNames.indexOf(this.sortField);
+        if (fieldIx >= 0) {
+          let sortMultiplier = this.sortAscending ? -1 : 1;
+          if (this.elementType.prototype._fieldDefs[fieldIx].sortIsNumber) {
+            tempArray = tempArray.sort((a, b) => (a.val - b.val) * sortMultiplier);
+          } else {
+            tempArray = tempArray.sort((a, b) => a.val.localeCompare(b.val) * sortMultiplier)
+          }
+          for (let ix = 0; ix < tempArray.length; ix++) {
+            this.sortArray.push(tempArray[ix].ix)
+          }
+        }
+      }
+      this.sortInvalidated = false;
+    }
+    return this.sortArray;
+  }
 }
 TableVar.elementDef = undefined;
 
@@ -260,6 +306,7 @@ class ArrayTableVar extends TableVar {
   
   handleArrayChanged () {
     this.tableChanged();
+    this.sortInvalidated = true;
 
     for (let callBack of this._arrayChangedCallbacks) {
       if (callBack) {

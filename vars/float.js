@@ -34,6 +34,7 @@ export class FloatVar extends BaseVar {
 FloatVar.typeDefinition = new BaseDefinition({
   type: 'Float',
   showValue: true,
-  inputType: 'range'
+  inputType: 'range',
+  sortIsNumber: true
 });
 

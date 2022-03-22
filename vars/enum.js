@@ -26,6 +26,11 @@ export class EnumVar extends IntVar {
     }
   }
 
+  get $sortValue() {
+    // @ts-ignore: TODO use different construction for this?
+    return Object.values(this.constructor.enumValues).indexOf(this.$v);
+  }
+
   get $niceStr() {
     // @ts-ignore: TODO use different construction for this?
     // console.log(this.constructor.enumLookUp);
@@ -56,12 +61,17 @@ EnumVar.initialize = function(name, enumValues) {
   });
 }
 
+EnumVar.$sortIsNumber = function () {
+  return true;
+}
+
 EnumVar.enumValues = {};
 EnumVar.enumLookUp = [];
 EnumVar.typeDefinition = new BaseDefinition({
   ...IntVar.typeDefinition,
   ...{
     type: 'Enum',
-    inputType: 'dropdown'
+    inputType: 'dropdown',
+    sortIsNumber: true
   }
 });
