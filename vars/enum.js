@@ -51,6 +51,7 @@ EnumVar.initialize = function(name, enumValues) {
   }
   newClass.enumLookUp = enumLookUp;
   newClass.enumOrder = enumOrder;
+  newClass.typeDefinition.range = [0, enumValues.length];
 
   // TODO: Should do this for record and array as well to be more compatible
   newClass.typeDefinition = new BaseDefinition({

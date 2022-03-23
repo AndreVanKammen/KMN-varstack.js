@@ -164,9 +164,12 @@ class TableVar extends BaseVar {
     return -1;
   }
 
-  setFilter(fieldName, value) {
+  setFilter(fieldName, value1, value2) {
+    this.sortField = fieldName;
+    this.sortAscending = false;
     this.filterField = fieldName;
-    this.filterValue = value.toLocaleLowerCase();
+    this.filterValue1 = value1;
+    this.filterValue2 = value2;
     this.sortInvalidated = true;
   }
 
@@ -189,20 +192,28 @@ class TableVar extends BaseVar {
       this.sortArray = [];
       if (this.sortField === '') {
         for (let ix = 0; ix < this.length; ix++) {
-          if (this.filterField) {
-            if (this.element(ix)[this.filterField].$niceStr.toLocaleLowerCase().indexOf(this.filterValue) >= 0) {
-              this.sortArray.push(ix);
-            }
-          } else {
-            this.sortArray.push(ix);
-          }
+          this.sortArray.push(ix);
         }
       } else {
         let tempArray = [];
         for (let ix = 0; ix < this.length; ix++) {
           let val = this.element(ix)[this.sortField].$sortValue;
           if (this.filterField) {
-            if (this.element(ix)[this.filterField].$niceStr.toLocaleLowerCase().indexOf(this.filterValue) >= 0) {
+            let fieldIx = this.elementType.prototype._fieldNames.indexOf(this.sortField);
+            let recInFiltered = true;
+            if (this.elementType.prototype._fieldDefs[fieldIx].sortIsNumber) {
+              if (this.element(ix)[this.filterField].$sortValue < this.filterValue1) {
+                recInFiltered = false;
+              }
+              if (this.element(ix)[this.filterField].$sortValue > this.filterValue2) {
+                recInFiltered = false;
+              }
+            } else {
+              recInFiltered = this.element(ix)[this.filterField].$niceStr.toLocaleLowerCase()
+                .indexOf(this.filterValue1.toLocaleLowerCase()) >= 0;
+            }
+
+            if (recInFiltered) {
               tempArray.push({ ix, val });
             }
           }
