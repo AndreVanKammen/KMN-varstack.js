@@ -164,12 +164,21 @@ class TableVar extends BaseVar {
     return -1;
   }
 
-  setSort(fieldName, ascending) {
+  setFilter(fieldName, value) {
+    this.filterField = fieldName;
+    this.filterValue = value.toLocaleLowerCase();
+    this.sortInvalidated = true;
+  }
+
+  setSort(fieldName, ascending = undefined) {
     if (this.sortField !== fieldName) {
       this.sortField = fieldName;
       this.sortInvalidated = true;
+    } else {
+      this.sortAscending = !this.sortAscending;
+      this.sortInvalidated = true;
     }
-    if (this.sortAscending !== ascending) {
+    if (ascending !== undefined && this.sortAscending !== ascending) {
       this.sortAscending = ascending;
       this.sortInvalidated = true;
     }
@@ -180,14 +189,29 @@ class TableVar extends BaseVar {
       this.sortArray = [];
       if (this.sortField === '') {
         for (let ix = 0; ix < this.length; ix++) {
-          this.sortArray.push(ix);
+          if (this.filterField) {
+            if (this.element(ix)[this.filterField].$niceStr.toLocaleLowerCase().indexOf(this.filterValue) >= 0) {
+              this.sortArray.push(ix);
+            }
+          } else {
+            this.sortArray.push(ix);
+          }
         }
       } else {
         let tempArray = [];
         for (let ix = 0; ix < this.length; ix++) {
           let val = this.element(ix)[this.sortField].$sortValue;
-          tempArray.push({ ix, val });
+          if (this.filterField) {
+            if (this.element(ix)[this.filterField].$niceStr.toLocaleLowerCase().indexOf(this.filterValue) >= 0) {
+              tempArray.push({ ix, val });
+            }
+          }
+          else {
+            tempArray.push({ ix, val });
+          }
         }
+
+
         let fieldIx = this.elementType.prototype._fieldNames.indexOf(this.sortField);
         if (fieldIx >= 0) {
           let sortMultiplier = this.sortAscending ? -1 : 1;
