@@ -199,7 +199,7 @@ class TableVar extends BaseVar {
         for (let ix = 0; ix < this.length; ix++) {
           let val = this.element(ix)[this.sortField].$sortValue;
           if (this.filterField) {
-            let fieldIx = this.elementType.prototype._fieldNames.indexOf(this.sortField);
+            let fieldIx = this.elementType.prototype._fieldNames.indexOf(this.filterField);
             let recInFiltered = true;
             if (this.elementType.prototype._fieldDefs[fieldIx].sortIsNumber) {
               if (this.element(ix)[this.filterField].$sortValue < this.filterValue1) {
@@ -314,8 +314,22 @@ class ArrayTableVar extends TableVar {
     // console.log('Move down ', ix, rec);
   }
 
+  insert(rec, insertIndex) {
+    let ix = this.array.indexOf(rec);
+    if (ix>=this.array.length-1) {
+      log.error('Invalid index({ix}) to move down!', { ix });
+      return;
+    }
+    let el = this._newElementInstance();
+    this.array.splice(insertIndex, 0, el);
+    el.$v = rec;
+    this.handleArrayChanged();
+    // console.log('Move down ', ix, rec);
+  }
+
   remove(rec) {
     let ix = this.array.indexOf(rec);
+    // TODO Cleanup events
     this.array.splice(ix,1);
     this.handleArrayChanged();
     // console.log('Remove ', ix, rec);
@@ -378,14 +392,19 @@ class ArrayTableVar extends TableVar {
     return result + ']';
   }
 
+  _newElementInstance() {
+    let el = new this.elementType;
+    el.$parent = this;
+    el.$setDefinition(this.elementDef);
+    el.$addEvent(this.tableChangedBound);
+    return el;
+  }
+
   updateElement(ix, arrayElement) {
     let el;
     let changed = false;
     while (this.array.length <= ix) {
-      el = new this.elementType;
-      el.$parent = this;
-      el.$setDefinition(this.elementDef);
-      el.$addEvent(this.tableChangedBound);
+      el = this._newElementInstance();
       this.array.push(el);
       changed = true;
     }
