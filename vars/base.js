@@ -9,6 +9,7 @@ export class BaseDefinition {
     this.name = defaults?.name || '';
     this.type = defaults?.type || '';
 
+    this.directInput = defaults?.directInput || '';
     this.inputType = defaults?.inputType || '';
     this.range = defaults?.range;
     this.step = defaults?.step || '';
