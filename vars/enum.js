@@ -45,13 +45,14 @@ EnumVar.initialize = function(name, enumValues) {
   let enumOrder = [];
   let enumLookUp = [];
   let index = 0;
-  for (let [key, val] of Object.entries(enumValues)) {
+  let enumEntries = Object.entries(enumValues);
+  for (let [key, val] of enumEntries) {
     enumLookUp[val] = key;
     enumOrder[val] = index++;
   }
   newClass.enumLookUp = enumLookUp;
   newClass.enumOrder = enumOrder;
-  newClass.typeDefinition.range = [0, enumValues.length];
+  newClass.typeDefinition.range = [0, enumEntries.length-1];
 
   // TODO: Should do this for record and array as well to be more compatible
   newClass.typeDefinition = new BaseDefinition({

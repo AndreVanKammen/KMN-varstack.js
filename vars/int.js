@@ -7,10 +7,12 @@ export class IntVar extends BaseVar {
     this._value = ~~0;
   };
 
+  /** @type {number} */
   get $v() {
     return this._value
   }
 
+  /** @type {number} */
   set $v(x) {
     if (isNaN(x)) {
       this._valueChanged();
