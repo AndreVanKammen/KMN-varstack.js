@@ -164,16 +164,25 @@ class TableVar extends BaseVar {
     return -1;
   }
 
+  /**
+   * 
+   * @param {string} fieldName 
+   * @param {string | number} value1 
+   * @param {number} value2 
+   */
   setFilter(fieldName, value1, value2) {
     this.sortField = fieldName;
-    this.sortAscending = false;
     this.filterField = fieldName;
-    this.filterValue1 = value1;
-    this.filterValue2 = value2;
+    this.filterValueStr = value1.toString();
+    // @ts-ignore
+    this.filterValue1 = Math.min(value1, value2);
+    // @ts-ignore
+    this.filterValue2 = Math.max(value1, value2);
     this.sortInvalidated = true;
   }
 
   setSort(fieldName, ascending = undefined) {
+    console.log('set sort:', fieldName);
     if (this.sortField !== fieldName) {
       this.sortField = fieldName;
       this.sortInvalidated = true;
@@ -210,7 +219,7 @@ class TableVar extends BaseVar {
               }
             } else {
               recInFiltered = this.element(ix)[this.filterField].$niceStr.toLocaleLowerCase()
-                .indexOf(this.filterValue1.toLocaleLowerCase()) >= 0;
+                .indexOf(this.filterValueStr.toLocaleLowerCase()) >= 0;
             }
 
             if (recInFiltered) {
