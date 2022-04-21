@@ -23,6 +23,15 @@ import { BlobVar } from './vars/blob.js';
 import { EnumVar } from './vars/enum.js';
 import { PercentageVar } from './vars/percentage.js';
 
+function classOf(typeToCheck, checkType) {
+  while (typeToCheck = typeToCheck.__proto__) {
+    if (typeToCheck === checkType) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const parseDefinition = function (definition, name) {
   if (typeof definition === 'object') {
     return definition;
@@ -190,12 +199,12 @@ const Types = {
             enumerable: true,
           });
         } else {
+          const typeClass = Types[fieldDef.type];
           Object.defineProperty(newClass.prototype, publicName, {
             get: function () {
               /** @type {BaseVar} */
               let value = this[privateName];
               if (!value) {
-                const typeClass = Types[fieldDef.type]
                 value = new typeClass();
                 this[privateName] = value;
                 value.$setDefinition(fieldDef);
@@ -220,6 +229,24 @@ const Types = {
             },
             enumerable: true,
           });
+          // If there is a record in a record, add all the fields to this fieldDefs and names
+          // And make public not enumerable shortcuts to the getters
+          if (classOf(typeClass, RecordVar)) {
+            for (let ix = 0; ix < typeClass.prototype._fieldNames.length; ix++) {
+              let subFieldName = typeClass.prototype._fieldNames[ix];
+              let fullSubFieldName = publicName + '.' + subFieldName;
+              let subFieldDef = typeClass.prototype._fieldDefs[ix];
+              fieldNames.push(fullSubFieldName);
+              fieldDefs.push(subFieldDef);
+              Object.defineProperty(newClass.prototype, fullSubFieldName, {
+                get: function () {
+                  return this[publicName][subFieldName]
+                },
+                enumerable: false,
+              });
+            }
+            // console.log('Sub Record:', typeClass.prototype, fieldDef);
+          }
         }
       } else {
         log.error(`Invalid type (${recordDef[publicName]}) in record definition`);

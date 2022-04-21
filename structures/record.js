@@ -25,8 +25,10 @@ class RecordVar extends BaseVar {
    * @param {(name:string, v:BlobBaseVar) => void} callback 
    */
   $linkBlobFields(callback) {
-    for (let fieldDef of this.$fieldDefs) {
-      let fieldName = fieldDef.name;
+    for (let ix = 0; ix < this.$fieldDefs.length; ix++) {
+      // for (let fieldDef of this.$fieldDefs) {
+      let fieldDef = this.$fieldDefs[ix];
+      let fieldName = this.$fieldNames[ix]; // fieldDef.name; subrecords have a different name
       if (!fieldDef.noStore) {
         const objVar = this[fieldName];
         if (objVar.constructor.isBlob) {
@@ -51,9 +53,11 @@ class RecordVar extends BaseVar {
 
   toObject () {
     let result = {}
-    for (let fieldDef of this.$fieldDefs) {
-      let fieldName = fieldDef.name;
-      if (!fieldDef.noStore) {
+    for (let ix = 0; ix < this.$fieldDefs.length; ix++) {
+      // for (let fieldDef of this.$fieldDefs) {
+      let fieldDef = this.$fieldDefs[ix];
+      let fieldName = this.$fieldNames[ix]; // fieldDef.name; subrecords have a different name
+      if (!fieldDef.noStore && fieldName === this.$fieldNames[ix]) {// don't store fields of subrecords here
         const objVar = this[fieldName];
         if (!objVar.constructor.isBlob) {
           if (objVar.toObject) {

@@ -17,6 +17,7 @@ class TableVar extends BaseVar {
     this.sortAscending = false;
     this.sortInvalidated = false;
     this.sortArray = [];
+    this.inLinkChanged = true;
   }
 
   /** @type {typeof BaseVar} */
@@ -371,8 +372,14 @@ class ArrayTableVar extends TableVar {
         callBack(this);
       }
     }
-    if (this.linkedTable) {
-      this.linkedTable.handleArrayChanged();
+    if (this.linkedTable && !this.inLinkChanged && this.linkedTable !== this) {
+      try {
+        // Prevent circular link firing forever
+        this.inLinkChanged = true;
+        this.linkedTable.handleArrayChanged();
+      } finally {
+        this.inLinkChanged = false;
+      }
     }
   }
 
