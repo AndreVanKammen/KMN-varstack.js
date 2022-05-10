@@ -190,7 +190,7 @@ export class BaseVar {
   }
 
   $removeEvent(handle) {
-    if (handle > deferedHandleOffset) {
+    if (handle >= deferedHandleOffset) {
       this._deferedCallbacks[handle - deferedHandleOffset] = null;
     }else{
       this._directCallbacks[handle] = null
