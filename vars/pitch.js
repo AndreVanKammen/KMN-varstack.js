@@ -1,8 +1,6 @@
 import { BaseDefinition } from "./base.js";
 import { FloatVar } from "./float.js";
 
-// Duration is a special case for a time var
-// TODO: Add a string function that handles days like 3d 10 min 5 seconds or something like that
 export class PitchVar extends FloatVar {
   get $niceStr() {
     let percentage = 0.0;
