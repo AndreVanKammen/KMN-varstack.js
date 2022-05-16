@@ -34,6 +34,13 @@ class TableVar extends BaseVar {
     return this.elementType.prototype._keyFieldName;
   }
 
+  _newElementInstance() {
+    let el = new this.elementType;
+    el.$parent = this;
+    el.$setDefinition(this.elementDef);
+    return el;
+  }
+
   updateElement(ix, arrayElement) {
   }
 
@@ -108,6 +115,40 @@ class TableVar extends BaseVar {
     }
     this.length = 0;
     console.trace('Invalid table assignment ', srcTable);
+  }
+
+  toJSONArray() {
+    let fieldNames = [];
+    for (let fieldDef of this.elementType.prototype._fieldDefs) {
+      let fieldName = fieldDef.name;
+      if (!fieldDef.noStore) {
+        fieldNames.push(fieldName);
+      }
+    }
+
+    let result = '[' + JSON.stringify(fieldNames);
+    for (let ix = 0; ix < this.length; ix++) {
+      let row = [];
+      let el = this.element(ix);
+      for (let fieldName of fieldNames) {
+        row.push(el[fieldName].$v);
+      }
+      result += ',\n' + JSON.stringify(row);
+    }
+    return result + ']';
+  }
+
+  fromJSONArray(data) {
+    let fieldNames = data[0];
+    for (let ix = 1; ix < data.length; ix++) {
+      let rec = this._newElementInstance();
+      for (let jx = 0; jx < fieldNames.length; jx++) {
+        let fieldName = fieldNames[jx];
+        let fieldValue = data[ix][jx];
+        rec[fieldName].$v = fieldValue;
+      }
+      this.add(rec);
+    }
   }
 
   // These specific functions are place here so they can be optimized later on 
@@ -387,31 +428,8 @@ class ArrayTableVar extends TableVar {
     return JSON.stringify(this.array, null, 2);
   }
 
-  toJSONArray() {
-    let fieldNames = [];
-    for (let fieldDef of this.elementType.prototype._fieldDefs) {
-      let fieldName = fieldDef.name;
-      if (!fieldDef.noStore) {
-        fieldNames.push(fieldName);
-      }
-    }
-
-    let result = '[' + JSON.stringify(fieldNames);
-    for (let ix = 0; ix < this.length; ix++) {
-      let row = [];
-      let el = this.array[ix];
-      for (let fieldName of fieldNames) {
-        row.push(el[fieldName].$v);
-      }
-      result += ',\n' + JSON.stringify(row);
-    }
-    return result + ']';
-  }
-
   _newElementInstance() {
-    let el = new this.elementType;
-    el.$parent = this;
-    el.$setDefinition(this.elementDef);
+    let el = super._newElementInstance()
     el.$addEvent(this.tableChangedBound);
     return el;
   }
