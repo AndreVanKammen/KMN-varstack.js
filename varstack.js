@@ -296,6 +296,7 @@ const Types = {
                   debugger;
                 }
                 this[privatelookupName] = privateVar;
+                privateVar._parent = this;
 
                 const lookupVar = this[publicName];
                 let lastUpdateTo = null;
