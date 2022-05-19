@@ -299,21 +299,23 @@ const Types = {
                 privateVar._parent = this;
 
                 const lookupVar = this[publicName];
-                let lastUpdateTo = null;
-                let lastUpdateToLinks = null;
+                let lastUpdateToLookupLinks = null;
+                let lastUpdateFromLookup = null;
+                let lastUpdateFromLinks = null;
                 const updateValue = () => {
-                  let result = lookupTable.find(lookupField, lookupVar.$v);
-                  if (result) {
-                    // 
-                    this[privatelookupName].$v = result;
-                    lastUpdateToLinks = result.$updateTo(this[privatelookupName]);
-                    lastUpdateTo?.$clearUpdateTo(lastUpdateToLinks);
-                    lastUpdateTo = result;
+                  let lookupRecord = lookupTable.find(lookupField, lookupVar.$v);
+
+                  this[privatelookupName].$clearUpdateTo(lastUpdateToLookupLinks);
+                  lastUpdateFromLookup?.$clearUpdateTo(lastUpdateFromLinks);
+
+                  if (lookupRecord) {
+                    this[privatelookupName].$v = lookupRecord;
+                    lastUpdateToLookupLinks = this[privatelookupName].$updateTo(lookupRecord);
+                    lastUpdateFromLinks = lookupRecord.$updateTo(this[privatelookupName]);
+                    lastUpdateFromLookup = lookupRecord;
                   }
                 };
-                lookupVar.$addEvent(updateValue);
-
-                updateValue();
+                lookupVar.$addEvent(updateValue, true);
               }
               return privateVar;
             },
