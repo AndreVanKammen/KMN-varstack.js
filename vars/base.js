@@ -87,6 +87,7 @@ export class BaseVar {
     return this.$v;
   }
 
+  /** @type {string} */
   get $niceStr() {
     if (this.$v != null) {
       //@ts-ignore 

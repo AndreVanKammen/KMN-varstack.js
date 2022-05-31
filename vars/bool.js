@@ -33,6 +33,7 @@ export class BoolVar extends BaseVar {
     }
   }
 
+  /** @type {string} */
   get $niceStr() {
     return this._value ? 'yes' : 'no';
   }
