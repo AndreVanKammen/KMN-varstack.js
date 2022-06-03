@@ -74,7 +74,8 @@ class TemplateBinding extends BaseBinding {
     this.record = record;
     this.template = template;
     for (let key of getVarsInTemplate(template)) {
-      record[key].$addEvent(this.handleVarChanged.bind(this));
+      let templateVar = record.$findVar(key);
+      templateVar.$addEvent(this.handleVarChanged.bind(this));
     }
     this.handleVarChanged();
   }
