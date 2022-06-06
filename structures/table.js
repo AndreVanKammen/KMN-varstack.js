@@ -13,7 +13,9 @@ class TableVar extends BaseVar {
 
     /** @type {typeof TableVar} */ /* @ts-ignore: Don't blame ts for not getting this :) */
     this.myProto = Reflect.getPrototypeOf(this);
-    this.inLinkChanged = true;
+    this.linkedTable = null;
+    this.inLinkChanged = false;
+    this.tableChangedBound = this.tableChanged.bind(this);
   }
 
   /** @type {typeof BaseVar} */
@@ -30,10 +32,21 @@ class TableVar extends BaseVar {
     return this.elementType.prototype._keyFieldName;
   }
 
+  tableChanged() {
+    // console.log('Table changed',this._directCallbacks);
+    if (this.linkedTable && !this.inLinkChanged) {
+      this.inLinkChanged = true;
+      this.linkedTable.tableChanged();
+      this.inLinkChanged = false;
+    }
+    this._valueChanged();
+  }
+
   _newElementInstance() {
     let el = new this.elementType;
-    el.$parent = this;
+    el._parent = this;
     el.$setDefinition(this.elementDef);
+    el.$addEvent(this.tableChangedBound,true);
     return el;
   }
 
@@ -209,15 +222,10 @@ class ArrayTableVar extends TableVar {
   constructor () {
     super()
   
-    this.tableChangedBound = this.tableChanged.bind(this);
     this.array = []
     // TODO write callback handler and use it in base and here it needs to re-use empty slots, this code does not
     //      this event is only triggered for array changes, not contents of array
     this._arrayChangedCallbacks = [];
-  }
-
-  tableChanged () {
-    this._valueChanged();
   }
 
   element(ix) {
@@ -306,12 +314,14 @@ class ArrayTableVar extends TableVar {
     this._arrayChangedCallbacks[handle] = null
   }
 
-  linkTables (srcTable) {
+  linkTables(srcTable) {
+    // console.log('Link tables: ', this, srcTable);
     if (this.array !== srcTable.array) {
       this.array = srcTable.array;
       this.linkedTable = null;
       this.handleArrayChanged();
       this.linkedTable = srcTable;
+      srcTable.linkedTable = this;
     }
   }
   
@@ -340,7 +350,6 @@ class ArrayTableVar extends TableVar {
 
   _newElementInstance() {
     let el = super._newElementInstance()
-    el.$addEvent(this.tableChangedBound);
     return el;
   }
 

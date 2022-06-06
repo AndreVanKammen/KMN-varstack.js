@@ -11,11 +11,10 @@ class RecordVar extends BaseVar {
     /** @type {typeof RecordVar} */ /* @ts-ignore: Don't blame ts for not getting this :) */
     this.myProto = Reflect.getPrototypeOf(this);
 
-    this._recordChangedAfterJSFinishBound = this._recordChangedAfterJSFinish.bind(this);
-    this._handleChangeAfterJSFinished = undefined;
-
     // @ts-ignore: Sometimes clashes with TS indexer define in record.ts
     this.changeLinks = [];
+
+    // Used in varstack when building the derived class
     this._recordChangedBound = this._recordChanged.bind(this);
     this._updateRunning = false;
   }
@@ -118,23 +117,8 @@ class RecordVar extends BaseVar {
     }
   }
 
-  _recordChangedAfterJSFinish() {
-    this._valueChanged()
-    // Setting this after prevents updates from the trigger changing it forever
-    this._handleChangeAfterJSFinished = undefined;
-  }
-
   _recordChanged() {
-    // Since record updates trigger after every fieldset let's collate
-    // them with resceduled time-out of 0 so it triggers only once.
-    // This could give side-effects, but best solution for now
-    // if (!this._handleChangeAfterJSFinished) {
-    //   this._handleChangeAfterJSFinished = 
-    //     globalThis.setTimeout(this._recordChangedAfterJSFinishBound, 0);
-    // }
-
-    // It gave to much issues
-    this._recordChangedAfterJSFinishBound();
+    this._valueChanged()
   }
 
   /**
@@ -147,6 +131,7 @@ class RecordVar extends BaseVar {
     // Protect against recursion between records
     if (this._updateRunning) {
       console.trace('Recursive update aborted!');
+      return;
     }
     this._updateRunning = true;
     try {

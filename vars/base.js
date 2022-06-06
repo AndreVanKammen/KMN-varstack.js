@@ -39,7 +39,7 @@ export class BaseVar {
   _hash = ++globalHashCount; // Give every object a unique nr for hash-maps
   /** @type {BaseDefinition} */
   _varDefinition = undefined;
-  _value = undefined;
+  // _value = undefined;
 
   constructor () {
   }
@@ -113,7 +113,12 @@ export class BaseVar {
     }
   }
 
-  _valueChanged () {
+  _valueChanged() {
+    // let fullName = this.$getFullName();
+    // if (fullName === '_inputShaders.[]_controls.[]') {
+    //   console.log('hiero');
+    // }
+    // console.log('Value changed', this.constructor.name, this._parent?.constructor.name, '"' + fullName + '"');
     for (const callBack of this._directCallbacks) {
       if (callBack) {
         callBack(this);
@@ -212,6 +217,25 @@ export class BaseVar {
     if (definition.defVal) {
       this.$v = definition.defVal;
     }
+  }
+
+  $getFullName() {
+    let result = '';
+    let seek = this;
+    let p = this._parent;
+    while (p) {
+      if (typeof p.element === 'function') {
+        result = '[]' + result;
+      } else {
+        let ix = Object.values(p).indexOf(seek);
+        if (ix !== -1) {
+          result = Object.keys(p)[ix] + '.' + result;
+        }
+      }
+      seek = p;
+      p = p._parent;
+    }
+    return result;
   }
 }
 
