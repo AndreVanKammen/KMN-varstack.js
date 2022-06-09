@@ -4,7 +4,7 @@ import { FloatVar } from "./float.js";
 
 export class PercentageVar extends FloatVar {
   get $niceStr() {
-    return (this._value * 100).toFixed(this._varDefinition.precision) + '%';
+    return (this._value * 100).toFixed(this.$varDefinition.precision) + '%';
   }
   // TODO: Add extra converter for setValue that handles HH:MM:SS.ZZZ from string
 

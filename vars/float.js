@@ -11,7 +11,7 @@ export class FloatVar extends BaseVar {
   }
 
   get $niceStr() {
-    return this._value.toFixed(this._varDefinition.precision);
+    return this._value.toFixed(this.$varDefinition.precision);
   }
 
   set $v(x) {
