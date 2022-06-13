@@ -32,7 +32,7 @@ function classOf(typeToCheck, checkType) {
   return false;
 }
 
-const parseDefinition = function (definition, name) {
+export const parseVarDefinition = function (definition, name) {
   if (typeof definition === 'object') {
     return definition;
   }
@@ -141,7 +141,7 @@ const Types = {
 
     for (var key in recordDef) {
       let publicName = key;
-      let fieldDef = parseDefinition(recordDef[publicName], publicName);
+      let fieldDef = parseVarDefinition(recordDef[publicName], publicName);
 
       fieldNames.push(publicName);
       fieldDefs.push(fieldDef);
@@ -162,7 +162,7 @@ const Types = {
                 const definitionVar = this.$findVar(fieldDef.defRef);
                 this[privateName+'_def'] = definitionVar;
                 const createValueVar = () => {
-                  const fieldDef2 = parseDefinition(definitionVar.$v, publicName);
+                  const fieldDef2 = parseVarDefinition(definitionVar.$v, publicName);
                   let typeToMake = Types[fieldDef2.type];
                   let value = this[privateName];
                   let oldValue;
@@ -338,7 +338,7 @@ const Types = {
   addArray: function (name, elementType) {
     let newClass = Types.addNamedType(name, ArrayTableVar);
     // newClass.constructor = ArrayTableVar.constructor;
-    let elementDef = parseDefinition(elementType, '');
+    let elementDef = parseVarDefinition(elementType, '');
 
     Types[name] = newClass;
     newClass.prototype._elementDef = elementDef;
