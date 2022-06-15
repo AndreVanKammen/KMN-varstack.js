@@ -246,14 +246,15 @@ class ArrayTableVar extends TableVar {
     return this.array;
   }
 
-  toObject () {
+  toObject (array = this.array) {
     if (this.elementType.prototype.toObject) {
       const result = [];
-      for (const el of this.array) {
+      for (const el of array) {
         result.push(el.toObject());
       }
       return result;
     } else {
+      // TODO Doesn't this need to be an array of the .$v of the vars
       return [...this.array];
     }
   }
@@ -295,6 +296,28 @@ class ArrayTableVar extends TableVar {
     el.$v = rec;
     this.handleArrayChanged();
     // console.log('Move down ', ix, rec);
+  }
+
+  splice(ix, deleteCount, ...items) {
+    // TODO Cleanup events
+    let newItems = [];
+    if (items && items.length) {
+      for (let item of items) {
+        let el = this._newElementInstance();
+        el.$v = item;
+        newItems.push(el);
+      }
+    }
+    let result = this.array.splice(ix,deleteCount,...newItems);
+    this.handleArrayChanged();
+    return result;
+  }
+
+  slice(startIx, endIx) {
+    // TODO Cleanup events
+    let result = this.array.slice(startIx, endIx);
+    this.handleArrayChanged();
+    return this.toObject(result);
   }
 
   remove(rec) {
