@@ -70,7 +70,6 @@ class RecordVar extends BaseVar {
     return result;
   }
 
-
   toString() {
     return JSON.stringify(this, null, 2);
   }
@@ -228,5 +227,6 @@ class RecordVar extends BaseVar {
     return this.myProto._fieldDefs;
   }
 }
+RecordVar.isValueType = false;
 
 export { RecordVar };

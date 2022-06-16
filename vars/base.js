@@ -2,6 +2,7 @@ import defer from '../../KMN-utils.js/defer.js';
 
 const deferedHandleOffset = 10000000;
 
+
 let globalHashCount = 0;
 export class BaseDefinition {
   constructor(defaults) {
@@ -38,7 +39,9 @@ export class BaseVar {
   _handleDeferedBound = this.handleDefered.bind(this);
   _hash = ++globalHashCount; // Give every object a unique nr for hash-maps
   /** @type {BaseDefinition} */
-  _varDefinition = undefined;
+  _varDefinition = null;
+  _parent = null;
+  _changeCollector = null;
   // _value = undefined;
 
   constructor () {
@@ -46,7 +49,19 @@ export class BaseVar {
 
   /** @type {import('../structures/record').RecordVar} */
   set $parent(x) {
-    this._parent = x;
+    if (this._parent !== x) {
+      this._parent = x;
+      // @ts-ignore
+      if (this.constructor.isValueType) {
+        this._changeCollector = null;
+        while (x) {
+          if (x._changeCollector) {
+            this._changeCollector = x._changeCollector;
+          }
+          x = x._parent;
+        }
+      }
+    }
   }
 
   get $parent() {
@@ -114,6 +129,9 @@ export class BaseVar {
   }
 
   _valueChanged() {
+    if (this._changeCollector) {
+      this._changeCollector.add(this);
+    }
     // let fullName = this.$getFullName();
     // if (fullName === '_inputShaders.[]_controls.[]') {
     //   console.log('hiero');
@@ -238,6 +256,8 @@ export class BaseVar {
     return result;
   }
 }
+
+BaseVar.isValueType = true;
 
 export class BaseBinding {
   constructor (baseVar) {

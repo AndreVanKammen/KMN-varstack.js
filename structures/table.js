@@ -44,7 +44,7 @@ class TableVar extends BaseVar {
 
   _newElementInstance() {
     let el = new this.elementType;
-    el._parent = this;
+    el.$parent = this;
     el.$setDefinition(this.elementDef);
     el.$addEvent(this.tableChangedBound,true);
     return el;
@@ -217,6 +217,7 @@ class TableVar extends BaseVar {
 
 }
 TableVar.elementDef = undefined;
+TableVar.isValueType = false;
 
 class ArrayTableVar extends TableVar {
   constructor () {

@@ -297,9 +297,9 @@ const Types = {
                 }
                 this[privatelookupName] = privateVar;
                 // We are not the parent for this var, if we do we break storage
-                // privateVar._parent = this;
-                privateVar._parent = lookupTable._parent;
-                // console.log('lookup parent: ', privateVar._parent);
+                // privateVar.$parent = this;
+                privateVar.$parent = lookupTable.$parent;
+                // console.log('lookup parent: ', privateVar.$parent);
 
                 const lookupVar = this[publicName];
                 let lastUpdateToLookupLinks = null;
