@@ -41,7 +41,7 @@ export class BaseVar {
   /** @type {BaseDefinition} */
   _varDefinition = null;
   _parent = null;
-  _changeCollector = null;
+  _changeMonitor = null;
   // _value = undefined;
 
   constructor () {
@@ -54,11 +54,11 @@ export class BaseVar {
       // @ts-ignore
       if (this.constructor.isValueType || this.constructor.isArrayType) {
         if (!this.$varDefinition.noStore) {
-          this._changeCollector = null;
+          this._changeMonitor = null;
           while (x) {
-            if (x._changeCollector) {
-              this._changeCollector = x._changeCollector;
-              this._changeCollector.registerVar(this);
+            if (x._changeMonitor) {
+              this._changeMonitor = x._changeMonitor;
+              this._changeMonitor.registerVar(this);
               break;
             }
             x = x._parent;
@@ -133,8 +133,8 @@ export class BaseVar {
   }
 
   _valueChanged() {
-    if (this._changeCollector) {
-      this._changeCollector.addVarChange(this);
+    if (this._changeMonitor) {
+      this._changeMonitor.addVarChange(this);
     }
     // let fullName = this.$getFullName();
     // if (fullName === '_inputShaders.[]_controls.[]') {
