@@ -223,6 +223,7 @@ class ArrayTableVar extends TableVar {
   constructor () {
     super()
   
+    this.arrayChangeCount = 0;
     this.array = []
     // TODO write callback handler and use it in base and here it needs to re-use empty slots, this code does not
     //      this event is only triggered for array changes, not contents of array
@@ -232,9 +233,11 @@ class ArrayTableVar extends TableVar {
   element(ix) {
     return this.array[ix];
   }
+
   get length() {
     return this.array.length;
   }
+
   set length(x) {
     if (this.array.length !== x) {
       // TODO cleanup of callbacks
@@ -349,8 +352,9 @@ class ArrayTableVar extends TableVar {
     }
   }
   
-  handleArrayChanged () {
+  handleArrayChanged() {
     this.tableChanged();
+    this.arrayChangeCount++;
 
     for (let callBack of this._arrayChangedCallbacks) {
       if (callBack) {
@@ -394,5 +398,7 @@ class ArrayTableVar extends TableVar {
     return el;
   }
 }
+
+ArrayTableVar.isArrayType = true;
 
 export { TableVar, ArrayTableVar };

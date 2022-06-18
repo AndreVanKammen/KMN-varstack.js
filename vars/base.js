@@ -20,7 +20,7 @@ export class BaseDefinition {
 
     this.isReadOnly = defaults?.isReadOnly || false;
     this.isKey = defaults?.isKey || false;
-    this.isValue = defaults?.isValue || false;
+    this.isValue = defaults?.isValue || false; // For key value records
     this.noStore = defaults?.noStore || false;
 
     this.lookup = defaults?.lookup || '';
@@ -52,13 +52,17 @@ export class BaseVar {
     if (this._parent !== x) {
       this._parent = x;
       // @ts-ignore
-      if (this.constructor.isValueType) {
-        this._changeCollector = null;
-        while (x) {
-          if (x._changeCollector) {
-            this._changeCollector = x._changeCollector;
+      if (this.constructor.isValueType || this.constructor.isArrayType) {
+        if (!this.$varDefinition.noStore) {
+          this._changeCollector = null;
+          while (x) {
+            if (x._changeCollector) {
+              this._changeCollector = x._changeCollector;
+              this._changeCollector.registerVar(this);
+              break;
+            }
+            x = x._parent;
           }
-          x = x._parent;
         }
       }
     }
@@ -130,7 +134,7 @@ export class BaseVar {
 
   _valueChanged() {
     if (this._changeCollector) {
-      this._changeCollector.add(this);
+      this._changeCollector.addVarChange(this);
     }
     // let fullName = this.$getFullName();
     // if (fullName === '_inputShaders.[]_controls.[]') {
@@ -242,22 +246,30 @@ export class BaseVar {
     let seek = this;
     let p = this._parent;
     while (p) {
-      if (typeof p.element === 'function') {
+      if (Array.isArray(p.array)) {
+        let ix = p.array.indexOf(seek);
+        // console.log(seek,p.array[0]);
+        result = '[' + ix + ']' + result;
+      } else if (typeof p.element === 'function') {
         result = '[]' + result;
       } else {
         let ix = Object.values(p).indexOf(seek);
         if (ix !== -1) {
-          result = Object.keys(p)[ix] + '.' + result;
+          result = '.' + Object.keys(p)[ix] + result;
         }
       }
       seek = p;
       p = p._parent;
+    }
+    if (seek) {
+      result = seek.constructor.name + result;
     }
     return result;
   }
 }
 
 BaseVar.isValueType = true;
+BaseVar.isArrayType = false;
 
 export class BaseBinding {
   constructor (baseVar) {

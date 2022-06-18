@@ -84,7 +84,7 @@ class TableCursor {
     }
 
     this._cursor = new recordType();
-    this._cursor.$parent = this.table;
+    this._cursor.$parent = this.table.$getMain();
   }
 
   set table (value) {
@@ -98,7 +98,7 @@ class TableCursor {
       }
       this._table = value;
       this.setCursorType(this._table.elementType);
-      this._cursor.$parent = this.table;
+      this._cursor.$parent = this.table.$getMain();
     }
   }
 
