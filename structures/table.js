@@ -340,6 +340,11 @@ class ArrayTableVar extends TableVar {
   removeArrayChangeEvent (handle) {
     this._arrayChangedCallbacks[handle] = null
   }
+  
+  restoreArray(restoreArray) {
+    this.array = restoreArray;
+    this.handleArrayChanged();
+  }
 
   linkTables(srcTable) {
     // console.log('Link tables: ', this, srcTable);

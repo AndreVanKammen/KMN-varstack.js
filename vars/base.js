@@ -52,19 +52,19 @@ export class BaseVar {
     if (this._parent !== x) {
       this._parent = x;
       // @ts-ignore
-      if (this.constructor.isValueType || this.constructor.isArrayType) {
-        if (!this.$varDefinition.noStore) {
-          this._changeMonitor = null;
-          while (x) {
-            if (x._changeMonitor) {
-              this._changeMonitor = x._changeMonitor;
-              this._changeMonitor.registerVar(this);
-              break;
-            }
-            x = x._parent;
+      // if (this.constructor.isValueType || this.constructor.isArrayType) {
+      if (!this.$varDefinition.noStore) {
+        this._changeMonitor = null;
+        while (x) {
+          if (x._changeMonitor) {
+            this._changeMonitor = x._changeMonitor;
+            this._changeMonitor.registerVar(this);
+            break;
           }
+          x = x._parent;
         }
       }
+      //}
     }
   }
 
@@ -270,6 +270,7 @@ export class BaseVar {
 
 BaseVar.isValueType = true;
 BaseVar.isArrayType = false;
+BaseVar.typeDefinition = new BaseDefinition();
 
 export class BaseBinding {
   constructor (baseVar) {

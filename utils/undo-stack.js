@@ -2,21 +2,31 @@ import defer from "../../KMN-utils.js/defer.js";
 import { ArrayTableVar } from "../structures/table.js";
 import { BaseVar } from "../vars/base.js";
 
-class RestoreRec {
+class RestoreValueRec {
+  /** @type {BaseVar} */
   v = null;
+  /** @type {any} */
+  oldValue = undefined;
+}
+class RestoreArrayRec {
+  /** @type {ArrayTableVar} */
+  v = null;
+  /** @type {number[]} */
   oldValue = undefined;
 }
 class UndoBlock {
   constructor() {
-    /** @type {Map<number,RestoreRec>} */
+    /** @type {Map<number,RestoreValueRec>} */
     this.oldValues = new Map();
+    /** @type {Map<number,RestoreArrayRec>} */
+    this.oldArrays = new Map();
   }
 }
 
 export class UndoStack {
   constructor() {
-    /** @type {Map<number,any>} */
-    this.oldValues = new Map();
+    /** @type {Map<number,RestoreValueRec>} */
+    this.cachedValues = new Map();
     /** @type {Map<number,BaseVar>} */
     this.changeList = new Map();
     /** @type {UndoBlock[]} */
@@ -24,14 +34,37 @@ export class UndoStack {
 
     this.changeSceduled = false;
     this.showChangesBound = this.showChanges.bind(this);
+    this.isLoading = true;
+  }
+
+  loadingFinished() {
+    this.isLoading = false;
+    this.clear();
+  }
+
+  clear() {
+    this.undoStack = [];
+    console.log('undostack clear');
   }
 
   undo() {
     let undoBlock = this.undoStack.pop();
+    if (!undoBlock) {
+      console.log('Nothing to undo!');
+      return;
+    }
     this.inUndo = true;
-    for (let v of undoBlock.oldValues.values()) {
-      v.v.$v = v.oldValue;
-      this.oldValues.set(v.v._hash, v.oldValue);
+    for (let cacheRec of undoBlock.oldValues.values()) {
+      cacheRec.v.$v = cacheRec.oldValue;
+      this.cachedValues.set(cacheRec.v._hash, cacheRec);
+    }
+    for (let cacheRec of undoBlock.oldArrays.values()) {
+      let newArray = [];
+      for (let ix = 1; ix < cacheRec.oldValue.length; ix++) {
+        newArray.push(this.cachedValues.get(cacheRec.oldValue[ix]).v);
+      }
+      cacheRec.v.restoreArray(newArray);
+      this.cachedValues.set(cacheRec.v._hash, cacheRec);
     }
     this.inUndo = false;
   }
@@ -41,23 +74,44 @@ export class UndoStack {
     for (let v of this.changeList.values()) {
       /** @type {typeof BaseVar} */ // @ts-ignore You don' t get it typescript? constructor === class type
       let varClass = v.constructor;
-      let oldValue = this.oldValues.get(v._hash);
+      let cacheRec = this.cachedValues.get(v._hash);
       let newValue = v.$v;
       if (varClass.isValueType) {
-        // console.log('Value change: ', v.$getFullName(), oldValue, '=>', newValue);
-        undoBlock.oldValues.set(v._hash, { v, oldValue });
-        this.oldValues.set(v._hash, newValue);
+        if (!this.isLoading) {
+          undoBlock.oldValues.set(v._hash, { v, oldValue: cacheRec.oldValue });
+        }
+        cacheRec.oldValue = newValue;
       } else if (varClass.isArrayType) {
         /** @type {ArrayTableVar} */ // @ts-ignore
         let atv = v;
-        if (oldValue && oldValue[0] !== atv.arrayChangeCount) {
-          newValue = [atv.arrayChangeCount, ...atv.array.map(x => x._hash)];
-          console.log('Array change: ', v.$getFullName(), oldValue, '=>', newValue);
-          this.oldValues.set(v._hash, newValue);
+        if (cacheRec && cacheRec[0] !== atv.arrayChangeCount) {
+          newValue = [atv.arrayChangeCount, ...atv.array.map(x => {
+            this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
+            return x._hash
+          })];
+          let isSame = cacheRec.oldValue.length === newValue.length;
+          if (isSame) {
+            for (let ix = 1; ix < newValue.length; ix++) {
+              if (cacheRec.oldValue[ix] !== newValue[ix]) {
+                isSame = false;
+                break;
+              }
+            }
+            if (isSame) {
+              console.log('Array didnt change: ', v.$getFullName(), cacheRec, '=>', newValue);
+            }
+          }
+          if (!this.isLoading && !isSame) {
+            
+
+            undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: cacheRec.oldValue });
+            console.log('Array change: ', v.$getFullName(), cacheRec, '=>', newValue);
+          }
+          cacheRec.oldValue = newValue;
         }
       }
-      console.log('Stored undo: ', undoBlock);
     }
+    console.log('Stored undo: ', undoBlock);
     this.undoStack.push(undoBlock);
     
     this.changeSceduled = false;
@@ -76,12 +130,15 @@ export class UndoStack {
     /** @type {typeof BaseVar} */
     let varClass = v.constructor;
     if (varClass.isValueType) {
-      this.oldValues.set(v._hash, v.$v);
+      this.cachedValues.set(v._hash, { v, oldValue: v.$v });
     } else if (varClass.isArrayType) {
-      this.oldValues.set(v._hash, [v.arrayChangeCount,...v.array.map(v => v._hash)]);
+      this.cachedValues.set(v._hash, {
+        v, oldValue: [v.arrayChangeCount, ...v.array.map(v => v._hash)]
+      });
       // console.log('Array change: ',v.$getFullName(),v.array);
     } else {
-      console.error('unknown var type registered', v);
+      this.cachedValues.set(v._hash, { v, oldValue: v.$v });
+      console.log('record');
     }
   }
 
