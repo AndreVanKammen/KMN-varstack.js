@@ -16,6 +16,7 @@ class TableVar extends BaseVar {
     this.linkedTable = null;
     this.inLinkChanged = false;
     this.tableChangedBound = this.tableChanged.bind(this);
+    this.inUpdate = 0;
   }
 
   /** @type {typeof BaseVar} */
@@ -46,7 +47,7 @@ class TableVar extends BaseVar {
     let el = new this.elementType;
     el.$parent = this;
     el.$setDefinition(this.elementDef);
-    el.$addEvent(this.tableChangedBound,true);
+    el.$addEvent(this.tableChangedBound,false);
     return el;
   }
 
@@ -86,44 +87,56 @@ class TableVar extends BaseVar {
   linkTables (srcTable) {
   }
 
+  beginUpdate() {
+    this.inUpdate++;
+  }
+  endUpdate() {
+    return --this.inUpdate === 0;
+  }
+
   /** @param {any} srcTable */
   set $v(srcTable) {
-    if (srcTable instanceof TableVar) {
-      if (srcTable.constructor === this.constructor) {
-        this.linkTables(srcTable);
-        return;
-      } else {
+    try {
+      this.beginUpdate();
+      if (srcTable instanceof TableVar) {
+        if (srcTable.constructor === this.constructor) {
+          this.linkTables(srcTable);
+          return;
+        } else {
+          for (let ix = 0; ix < srcTable.length; ix++) {
+            this.updateElement(ix, srcTable.element(ix));
+          }
+          this.length = srcTable.length
+          return;
+        }
+      } else if (Array.isArray(srcTable)) {
         for (let ix = 0; ix < srcTable.length; ix++) {
-          this.updateElement(ix, srcTable.element(ix));
+          this.updateElement(ix, srcTable[ix]);
         }
         this.length = srcTable.length
         return;
-      }
-    } else if (Array.isArray(srcTable)) {
-      for (let ix = 0; ix < srcTable.length; ix++) {
-        this.updateElement(ix, srcTable[ix]);
-      }
-      this.length = srcTable.length
-      return;
-    } else if (typeof srcTable === 'object') {
-      let ix = 0;
-      // If source is an object and out element has a keyFieldName we map it's keys and values to the records
-      let rec = new this.elementType;
-      rec.$parent = this;
-      if (rec instanceof RecordVar && rec.$keyFieldName && rec.$valueFieldName) {
-        for (let name in srcTable) {
-          if (!(name.startsWith('_'))) {
-            rec[rec.$keyFieldName].$v = name;
-            rec[rec.$valueFieldName].$v = srcTable[name];
-            this.updateElement(ix++, rec);
+      } else if (typeof srcTable === 'object') {
+        let ix = 0;
+        // If source is an object and out element has a keyFieldName we map it's keys and values to the records
+        let rec = new this.elementType;
+        rec.$parent = this;
+        if (rec instanceof RecordVar && rec.$keyFieldName && rec.$valueFieldName) {
+          for (let name in srcTable) {
+            if (!(name.startsWith('_'))) {
+              rec[rec.$keyFieldName].$v = name;
+              rec[rec.$valueFieldName].$v = srcTable[name];
+              this.updateElement(ix++, rec);
+            }
           }
+          this.length = ix;
+          return;
         }
-        this.length = ix;
-        return;
-      } 
+      }
+      this.length = 0;
+      console.trace('Invalid table assignment ', srcTable);
+    } finally {
+      this.endUpdate();
     }
-    this.length = 0;
-    console.trace('Invalid table assignment ', srcTable);
   }
 
   toJSONArray() {
@@ -356,10 +369,29 @@ class ArrayTableVar extends TableVar {
       srcTable.linkedTable = this;
     }
   }
+
+  beginUpdate() {
+    super.beginUpdate();
+    this.beginUpdateChangeCount = this.arrayChangeCount;
+  }
+
+  endUpdate() {
+    if (super.endUpdate()) {
+      if (this.beginUpdateChangeCount !== this.arrayChangeCount) {
+        this.arrayChangeCount = this.beginUpdateChangeCount;
+        this.handleArrayChanged();
+      }
+      return true;
+    }
+    return false;
+  }
   
   handleArrayChanged() {
-    this.tableChanged();
     this.arrayChangeCount++;
+    if (this.inUpdate > 0) {
+      return;
+    }
+    this.tableChanged();
 
     for (let callBack of this._arrayChangedCallbacks) {
       if (callBack) {

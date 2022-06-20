@@ -87,7 +87,7 @@ export class UndoStack {
         if (cacheRec && cacheRec[0] !== atv.arrayChangeCount) {
           newValue = [atv.arrayChangeCount, ...atv.array.map(x => {
             this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
-            return x._hash
+            return x._hash;
           })];
           let isSame = cacheRec.oldValue.length === newValue.length;
           if (isSame) {
@@ -97,13 +97,11 @@ export class UndoStack {
                 break;
               }
             }
-            if (isSame) {
-              console.log('Array didnt change: ', v.$getFullName(), cacheRec, '=>', newValue);
-            }
+            // if (isSame) {
+            //   console.log('Array didnt change: ', v.$getFullName(), cacheRec, '=>', newValue);
+            // }
           }
           if (!this.isLoading && !isSame) {
-            
-
             undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: cacheRec.oldValue });
             console.log('Array change: ', v.$getFullName(), cacheRec, '=>', newValue);
           }
@@ -138,7 +136,6 @@ export class UndoStack {
       // console.log('Array change: ',v.$getFullName(),v.array);
     } else {
       this.cachedValues.set(v._hash, { v, oldValue: v.$v });
-      console.log('record');
     }
   }
 
