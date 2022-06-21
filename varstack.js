@@ -284,11 +284,11 @@ const Types = {
                   }
                   lookupTable = current;
                   lookupField = pathTolookup[pathTolookup.length - 1];
-                  console.log(
-                    "lookup resolved for " + publicName,
-                    lookupTable,
-                    lookupField
-                  );
+                  // console.log(
+                  //   "lookup resolved for " + publicName,
+                  //   lookupTable,
+                  //   lookupField
+                  // );
                 }
                 // This code is executed once for each instance of the class
                 privateVar = new lookupTable.elementType();

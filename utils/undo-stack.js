@@ -33,11 +33,13 @@ export class UndoStack {
     this.undoStack = [];
 
     this.changeSceduled = false;
-    this.showChangesBound = this.showChanges.bind(this);
+    this.showChangesBound = this.handleChanges.bind(this);
     this.isLoading = true;
   }
 
   loadingFinished() {
+    // Handle the last changes without storing them
+    this.handleChanges();
     this.isLoading = false;
     this.clear();
   }
@@ -69,7 +71,7 @@ export class UndoStack {
     this.inUndo = false;
   }
 
-  showChanges() {
+  handleChanges() {
     let undoBlock = new UndoBlock();
     for (let v of this.changeList.values()) {
       /** @type {typeof BaseVar} */ // @ts-ignore You don' t get it typescript? constructor === class type
@@ -103,14 +105,16 @@ export class UndoStack {
           }
           if (!this.isLoading && !isSame) {
             undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: cacheRec.oldValue });
-            console.log('Array change: ', v.$getFullName(), cacheRec, '=>', newValue);
+            console.log('Array change: ', v.$getFullName(), cacheRec.oldValue.slice(0), '=>', newValue);
           }
           cacheRec.oldValue = newValue;
         }
       }
     }
-    console.log('Stored undo: ', undoBlock);
-    this.undoStack.push(undoBlock);
+    if (undoBlock.oldValues.size || undoBlock.oldArrays.size) {
+      console.log('Stored undo: ', undoBlock);
+      this.undoStack.push(undoBlock);
+    }
     
     this.changeSceduled = false;
     this.changeList = new Map();
