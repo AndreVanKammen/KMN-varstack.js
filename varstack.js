@@ -31,8 +31,13 @@ function classOf(typeToCheck, checkType) {
   }
   return false;
 }
-
-export const parseVarDefinition = function (definition, name) {
+/**
+ * 
+ * @param {string} definition 
+ * @param {string} name 
+ * @returns {BaseDefinition}
+ */
+export const parseVarDefinition = function (definition, name = undefined) {
   if (typeof definition === 'object') {
     return definition;
   }
@@ -52,10 +57,11 @@ export const parseVarDefinition = function (definition, name) {
   def.name = name;
   def.type = typeName;
   
-  def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substr(6)?.split('..')?.map(x => Number.parseFloat(x)) || def.range;
-  def.step = definitions.filter(x => x.startsWith('step>'))[0]?.substr(5) || def.step;
-  def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substr(7) || def.defVal;
-  let precision = definitions.filter(x => x.startsWith('precision>'))[0]?.substr(10);
+  def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substring(6)?.split('..')?.map(x => Number.parseFloat(x)) || def.range;
+  def.step = definitions.filter(x => x.startsWith('step>'))[0]?.substring(5) || def.step;
+  def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substring(7) || def.defVal;
+  let precision = definitions.filter(x => x.startsWith('precision>'))[0]?.substring(10);
+  // @ts-ignore
   def.precision = isFinite(precision) ? ~~(precision) : def.precision;
 
   def.isReadOnly = definitions.indexOf('ro') !== -1 || def.isReadOnly;
@@ -64,10 +70,10 @@ export const parseVarDefinition = function (definition, name) {
   def.isValue = definitions.indexOf('value') !== -1;
   def.noStore = definitions.indexOf('nostore') !== -1;
 
-  def.inputType = definitions.filter(x => x.startsWith('input>'))[0]?.substr(6)||def.inputType;
-  def.lookup = definitions.filter(x => x.startsWith('lookup>'))[0]?.substr(7);
-  def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substr(7);
-  def.ref = definitions.filter(x => x.startsWith('ref>'))[0]?.substr(4);
+  def.inputType = definitions.filter(x => x.startsWith('input>'))[0]?.substring(6)||def.inputType;
+  def.lookup = definitions.filter(x => x.startsWith('lookup>'))[0]?.substring(7);
+  def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substring(7);
+  def.ref = definitions.filter(x => x.startsWith('ref>'))[0]?.substring(4);
 
 
   return def;

@@ -16,7 +16,7 @@ export class PercentageVar extends FloatVar {
 PercentageVar.typeDefinition = new BaseDefinition(
   {
     ...FloatVar.typeDefinition, ...{
-      type: 'Percentage',
-      isReadOnly: true // TODO make edit
+      type: 'Percentage' //,
+      // isReadOnly: true // TODO make edit
     }
   });
