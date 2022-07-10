@@ -282,7 +282,7 @@ export class BaseBinding {
     this.changeEvent = undefined;
   }
 
-  remove() {
+  dispose() {
     if (this.changeEvent !== undefined) {
       this.baseVar.$removeEvent(this.changeEvent);
     }
