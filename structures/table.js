@@ -17,6 +17,7 @@ class TableVar extends BaseVar {
     this.inLinkChanged = false;
     this.tableChangedBound = this.tableChanged.bind(this);
     this.inUpdate = 0;
+    this.onFindKeyAsync = async (keyValue) => null;
   }
 
   /** @type {typeof BaseVar} */
@@ -199,6 +200,14 @@ class TableVar extends BaseVar {
         return el;
       }
     }
+  }
+
+  async findKeyAsync(keyValue) {
+    let result = this.find(this.keyFieldName, keyValue);
+    if (!result) {
+      result = await this.onFindKeyAsync(keyValue);
+    }
+    return result;
   }
 
   /**

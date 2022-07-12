@@ -56,7 +56,8 @@ class RecordVar extends BaseVar {
       // for (let fieldDef of this.$fieldDefs) {
       let fieldDef = this.$fieldDefs[ix];
       let fieldName = this.$fieldNames[ix]; // fieldDef.name; subrecords have a different name
-      if (!fieldDef.noStore && fieldName === this.$fieldNames[ix]) {// don't store fields of subrecords here
+
+      if (fieldName.indexOf('.')===-1 && !fieldDef.noStore && fieldName === this.$fieldNames[ix]) {// don't store fields of subrecords here
         const objVar = this[fieldName];
         if (!objVar.constructor.isBlob) {
           if (objVar.toObject) {

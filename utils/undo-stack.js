@@ -105,14 +105,14 @@ export class UndoStack {
           }
           if (!this.isLoading && !isSame) {
             undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: cacheRec.oldValue });
-            console.log('Array change: ', v.$getFullName(), cacheRec.oldValue.slice(0), '=>', newValue);
+            // console.log('Array change: ', v.$getFullName(), cacheRec.oldValue.slice(0), '=>', newValue);
           }
           cacheRec.oldValue = newValue;
         }
       }
     }
     if (undoBlock.oldValues.size || undoBlock.oldArrays.size) {
-      console.log('Stored undo: ', undoBlock);
+      // console.log('Stored undo: ', undoBlock);
       this.undoStack.push(undoBlock);
     }
     
