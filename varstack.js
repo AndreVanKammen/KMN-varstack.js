@@ -311,20 +311,30 @@ const Types = {
                 let lastUpdateToLookupLinks = null;
                 let lastUpdateFromLookup = null;
                 let lastUpdateFromLinks = null;
-                const updateValue = () => {
+                let lastLookUpEvent = -1;
+                const updateValue = async () => {
                   let lookupRecord = lookupTable.find(lookupField, lookupVar.$v);
 
                   this[privatelookupName].$clearUpdateTo(lastUpdateToLookupLinks);
                   lastUpdateFromLookup?.$clearUpdateTo(lastUpdateFromLinks);
 
                   if (lookupRecord) {
+                    if (lastLookUpEvent>=0) {
+                      lookupTable.$removeEvent(lastLookUpEvent);
+                      lastLookUpEvent = -1;
+                    }
                     this[privatelookupName].$v = lookupRecord;
                     lastUpdateToLookupLinks = this[privatelookupName].$updateTo(lookupRecord);
                     lastUpdateFromLinks = lookupRecord.$updateTo(this[privatelookupName]);
                     lastUpdateFromLookup = lookupRecord;
+                  } else {
+                    if (lastLookUpEvent === -1) {
+                      lastLookUpEvent = lookupTable.$addDeferedEvent(updateValue, false);
+                    }
                   }
                 };
-                lookupVar.$addEvent(updateValue, true);
+                lookupVar.$addDeferedEvent(updateValue, true);
+                
               }
               return privateVar;
             },
