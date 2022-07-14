@@ -150,7 +150,7 @@ export class UndoStack {
     this.changeList.set(changedVar._hash, changedVar);
     if (!this.changeSceduled) {
       this.changeSceduled = true;
-      setTimeout(this.showChangesBound,100);
+      setTimeout(this.showChangesBound,1000);
     }
   }
 }
