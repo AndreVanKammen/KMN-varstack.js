@@ -24,7 +24,7 @@ export class Float32ArrayVar extends BlobBaseVar {
         this._value = new WeakRef(x);
         this._valueChanged();
       }
-    } else if (Array.isArray(x)) {
+    } else if (x instanceof ArrayBuffer || Array.isArray(x)) {
       this._value = new WeakRef(new Float32Array(x));
       this._valueChanged();
     } else {

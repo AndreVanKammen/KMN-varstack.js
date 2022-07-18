@@ -42,10 +42,15 @@ export class DateVar extends BaseVar {
 
   get $niceStr() {
     if (this._value) {
-      var timeString = this._value.toISOString();
-      return timeString.substring(2,10) + ' ' + timeString.substring(11,16);
+      let todayStr = (new Date()).toISOString().substring(2, 10);
+      var dateStr = this._value.toISOString().substring(2, 10);
+      if (todayStr === dateStr) {
+        return this._value.toLocaleString(undefined, { timeStyle: 'short' });
+      } else {
+        return this._value.toLocaleString(undefined, { dateStyle: 'short' });
+      }
     } else {
-      return undefined;
+      return '-';
     }
   }
 
