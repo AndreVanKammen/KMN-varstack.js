@@ -21,5 +21,6 @@ export class StringVar extends BaseVar {
 
 StringVar.typeDefinition = new BaseDefinition({
   type: 'String',
-  inputType: 'text'
+  inputType: 'text',
+  defVal: ''
 });

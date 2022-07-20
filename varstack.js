@@ -59,7 +59,10 @@ export const parseVarDefinition = function (definition, name = undefined) {
   
   def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substring(6)?.split('..')?.map(x => Number.parseFloat(x)) || def.range;
   def.step = definitions.filter(x => x.startsWith('step>'))[0]?.substring(5) || def.step;
-  def.defVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substring(7) || def.defVal;
+  let newDefVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substring(7);
+  if (newDefVal != null) {
+    def.defVal = newDefVal;
+  }
   let precision = definitions.filter(x => x.startsWith('precision>'))[0]?.substring(10);
   // @ts-ignore
   def.precision = isFinite(precision) ? ~~(precision) : def.precision;

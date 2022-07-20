@@ -14,7 +14,7 @@ export class BaseDefinition {
     this.inputType = defaults?.inputType || '';
     this.range = defaults?.range;
     this.step = defaults?.step || '';
-    this.defVal = defaults?.defVal || '';
+    this.defVal = defaults?.defVal != null ? defaults?.defVal : 0;
     this.showValue = defaults?.showValue || '';
     this.precision = isFinite(defaults?.precision) ? ~~(defaults?.precision) : 2;
 

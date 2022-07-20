@@ -31,5 +31,6 @@ export class IntVar extends BaseVar {
 IntVar.typeDefinition = new BaseDefinition({
   type: 'Int',
   inputType: 'number',
+  defVal: 0,
   sortIsNumber: true
 });
