@@ -5,7 +5,7 @@ export class ChangeCollector extends IntVar {
   constructor() {
     super();
     this.links = [];
-    this._handleSubChangeBound = this.triggerChange.bind(this);
+    this._triggerChangeBound = this.triggerChange.bind(this);
   }
 
   /**
@@ -15,7 +15,7 @@ export class ChangeCollector extends IntVar {
   addVar(baseVar) {
     this.links.push({
       baseVar,
-      link: baseVar.$addDeferedEvent(this._handleSubChangeBound)
+      link: baseVar.$addDeferedEvent(this._triggerChangeBound)
     });
   }
 
