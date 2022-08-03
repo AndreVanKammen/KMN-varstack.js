@@ -178,8 +178,12 @@ const Types = {
                   let oldCallbacks;
                   if (value !== undefined) {
                     if (value instanceof RecordVar) {
-                      let fn = value.$keyFieldName
-                      oldValue = value[fn].$v;
+                      let fn = value.$keyFieldName;
+                      if (fn) {
+                        oldValue = value[fn].$v;
+                      } else {
+                        oldValue = value.$v;
+                      }
                     } else {
                       oldValue = value.$v;
                     }
