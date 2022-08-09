@@ -18,6 +18,7 @@ class TableVar extends BaseVar {
     this.tableChangedBound = this.tableChanged.bind(this);
     this.inUpdate = 0;
     this.onFindKeyAsync = async (keyValue) => null;
+    this.onRemove = (rec) => null;
   }
 
   /** @type {typeof BaseVar} */
@@ -351,6 +352,7 @@ class ArrayTableVar extends TableVar {
     // TODO Cleanup events
     this.array.splice(ix,1);
     this.handleArrayChanged();
+    this.onRemove(rec);
     // console.log('Remove ', ix, rec);
   }
 
