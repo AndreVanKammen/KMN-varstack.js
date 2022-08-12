@@ -36,7 +36,22 @@ export class BlobVar extends BlobBaseVar {
   get $niceStr() {
     let lengthVal = (this._value?.deref()?.byteLength);
     if (lengthVal) {
-      return lengthVal.toLocaleString() + 'bytes';
+      if (lengthVal < 1024) {
+        return lengthVal.toLocaleString() + 'bytes';
+      } else {
+        lengthVal /= 1024;
+        if (lengthVal < 1024) {
+          return lengthVal.toLocaleString(undefined,{maximumFractionDigits:1}) + 'KiB';
+        } else {
+          lengthVal /= 1024;
+          if (lengthVal < 1024) {
+            return lengthVal.toLocaleString(undefined,{maximumFractionDigits:1}) + 'MiB';
+          } else {
+            lengthVal /= 1024;
+            return lengthVal.toLocaleString(undefined,{maximumFractionDigits:1}) + 'TiB';
+          }
+        }
+      }
     } else {
       return 'not loaded';
     }
