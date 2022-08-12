@@ -108,6 +108,14 @@ class TableCursor {
 
   // /** @type {import('../../../TS/record.js').IRecordVar} */
   /** @type {T} */
+  get original() {
+    let key = this._cursor.$v[this._cursor.$keyFieldName].$v;
+    // @ts-ignore
+    return this._table.find(this._cursor.$keyFieldName, key);
+  }
+
+  // /** @type {import('../../../TS/record.js').IRecordVar} */
+  /** @type {T} */
   get cursor () {
     // @ts-ignore
     return this._cursor;
