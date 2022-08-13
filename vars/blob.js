@@ -1,3 +1,4 @@
+import { byteLengthToStr } from '../../KMN-utils.js/format.js';
 import { BaseDefinition, BaseVar } from './base.js';
 import { BlobBaseVar } from './blob-base.js';
 
@@ -36,22 +37,7 @@ export class BlobVar extends BlobBaseVar {
   get $niceStr() {
     let lengthVal = (this._value?.deref()?.byteLength);
     if (lengthVal) {
-      if (lengthVal < 1024) {
-        return lengthVal.toLocaleString() + 'bytes';
-      } else {
-        lengthVal /= 1024;
-        if (lengthVal < 1024) {
-          return lengthVal.toLocaleString(undefined,{maximumFractionDigits:1}) + 'KiB';
-        } else {
-          lengthVal /= 1024;
-          if (lengthVal < 1024) {
-            return lengthVal.toLocaleString(undefined,{maximumFractionDigits:1}) + 'MiB';
-          } else {
-            lengthVal /= 1024;
-            return lengthVal.toLocaleString(undefined,{maximumFractionDigits:1}) + 'TiB';
-          }
-        }
-      }
+      return byteLengthToStr(lengthVal);
     } else {
       return 'not loaded';
     }
