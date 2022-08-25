@@ -18,7 +18,8 @@ class TableVar extends BaseVar {
     this.tableChangedBound = this.tableChanged.bind(this);
     this.inUpdate = 0;
     this.onFindKeyAsync = async (keyValue) => null;
-    this.onRemove = (rec) => null;
+    this.onCleanUpForRemove = (rec) => null;
+    this.onRemoveFromStore = (rec) => null;
   }
 
   /** @type {typeof BaseVar} */
@@ -347,13 +348,36 @@ class ArrayTableVar extends TableVar {
     return this.toObject(result);
   }
 
+  removeKey(searchKey) {
+    let ix = -1
+    if (!this.keyFieldName) {
+      console.error('Table to delete from has no keyField');
+    }
+    this.removeIx(this.findIx(this.keyFieldName, searchKey));
+  }
+
   remove(rec) {
     let ix = this.array.indexOf(rec);
-    // TODO Cleanup events
-    this.array.splice(ix,1);
-    this.handleArrayChanged();
-    this.onRemove(rec);
-    // console.log('Remove ', ix, rec);
+    if (ix === -1) {
+      if (this.keyFieldName) {
+        let searchKey = rec[this.keyFieldName].$v;
+        ix = this.findIx(this.keyFieldName, searchKey);
+      }
+    }
+    this.removeIx(ix);
+  }
+
+  removeIx(ix) {
+    if (ix !== -1) {
+      let rec = this.array[ix];
+      // TODO Cleanup events
+      this.array.splice(ix, 1);
+      this.handleArrayChanged();
+      this.onCleanUpForRemove(rec);
+      this.onRemoveFromStore(rec);
+    } else {
+      console.error('Can\'t find record to remove!');
+    }
   }
 
   addArrayChangeEvent (callBack) {

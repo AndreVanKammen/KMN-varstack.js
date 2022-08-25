@@ -376,3 +376,10 @@ const Types = {
 
 }
 export { Types };
+
+
+// Known bugs
+//   lookup record problem
+//     -they are a copy, which makes blobs unusable in them
+//     -if loading is delayed they can become empty record and don't refresh because key doesnt change
+//     -they are a copy so they can be bound to in UI and track lookup changes
