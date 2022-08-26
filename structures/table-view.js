@@ -50,6 +50,11 @@ export class TableView {
     }
   }
 
+  setSortArray(sortArray) {
+    this.sortArray = sortArray;
+    this.sortInvalidated = false;
+  }
+
   getSortArray() {
     if (this.sortInvalidated) {
       this.sortArray = [];
