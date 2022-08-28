@@ -22,6 +22,7 @@ import { Float32ArrayVar } from './vars/float-32-array.js';
 import { BlobVar } from './vars/blob.js';
 import { EnumVar } from './vars/enum.js';
 import { PercentageVar } from './vars/percentage.js';
+import { TextVar } from './vars/text.js';
 
 function classOf(typeToCheck, checkType) {
   while (typeToCheck = typeToCheck.__proto__) {
@@ -73,6 +74,7 @@ export const parseVarDefinition = function (definition, name = undefined) {
   def.isValue = definitions.indexOf('value') !== -1;
   def.noStore = definitions.indexOf('nostore') !== -1;
 
+  def.directInput = BoolVar.parseStr(definitions.filter(x => x.startsWith('direct>'))[0]?.substring(7),def.directInput);
   def.inputType = definitions.filter(x => x.startsWith('input>'))[0]?.substring(6)||def.inputType;
   def.lookup = definitions.filter(x => x.startsWith('lookup>'))[0]?.substring(7);
   def.defRef = definitions.filter(x => x.startsWith('defref>'))[0]?.substring(7);
@@ -90,6 +92,7 @@ const Types = {
   Float: FloatVar,
   Bool: BoolVar,
   String: StringVar,
+  Text: TextVar,
   Date: DateVar,
   Time: TimeVar,
   Percentage: PercentageVar,

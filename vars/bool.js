@@ -19,8 +19,7 @@ export class BoolVar extends BaseVar {
         y = !!~~x
       } else {
         if (typeof x === 'string' && x) {
-          let c = x.trim()[0].toUpperCase()
-          x = !(c==='N' || c==='F')
+          x = BoolVar.parseStr(x);
         } else {
           log.error(`Invalid value (${x}) for BoolVar`);
         }
@@ -38,6 +37,16 @@ export class BoolVar extends BaseVar {
     return this._value ? 'yes' : 'no';
   }
 }
+
+BoolVar.parseStr= function(str, defaultValue) {
+  if (str && str.length) {
+    let c = str.trim()[0].toUpperCase()
+    return !(c === 'N' || c === 'F' || c === '0');
+  } else {
+    return defaultValue;
+  }
+}
+
 BoolVar.typeDefinition = new BaseDefinition({
   type: 'Bool',
   inputType: 'checkbox'
