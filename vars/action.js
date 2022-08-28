@@ -16,7 +16,7 @@ ActionVar.typeDefinition = new BaseDefinition(
   });
 
 export class ActionHandler extends ActionVar {
-  constructor(onAction) {
+  constructor(onAction = () => console.log('action')) {
     super();
     this.isAsync = onAction.constructor.name === 'AsyncFunction';
     this.onAction = onAction;
