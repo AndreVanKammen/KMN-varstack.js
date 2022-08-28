@@ -28,6 +28,7 @@ export class ActionHandler extends ActionVar {
     if (v.$v) {
       if (this.isAsync) {
         await this.onAction();
+        this.$v = false;
       } else {
         this.onAction();
         setTimeout(() => this.$v = false, this.defaultTimeOut);
