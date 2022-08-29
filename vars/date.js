@@ -7,6 +7,7 @@ export class DateVar extends BaseVar {
     this._value = new Date();
   };
 
+  /** @type {Date} */
   get $v() {
     return this._value
   }
