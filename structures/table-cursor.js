@@ -90,12 +90,12 @@ class TableCursor {
   set table (value) {
     // Consider replacing _ with # when the time comes they all support it (firefox and safari currently give errors on #)
     if (this._table !== value) {
-      if (this._index.$v === -1) {
-        // Always trigger indexvar on table change
-        this._index._valueChanged();
-      } else {
-        this._index.$v = -1;
-      }
+      // if (this._index.$v === -1) {
+      //   // Always trigger indexvar on table change
+      //   this._index._valueChanged();
+      // } else {
+      this._index.$v = -1;
+      //}
       this._table = value;
       this.setCursorType(this._table.elementType);
       this._cursor.$parent = this.table.$getMain();
@@ -121,7 +121,10 @@ class TableCursor {
     return this._cursor;
   }
 
-  get index () {
+  get index() {
+    if (this._index.$v >= this.table.length) {
+      this._index.$v = -1;
+    }
     return this._index;
   }
 }
