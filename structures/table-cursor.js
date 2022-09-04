@@ -6,7 +6,7 @@
 import log from "../core/log.js";
 import { Types } from "../varstack.js";
 import { RecordVar } from "./record.js";
-import { TableVar } from "./table.js";
+import { ArrayTableVar, TableVar } from "./table.js";
 import { BaseVar } from '../vars/base.js';
 import { IntVar } from "../vars/int.js";
 
@@ -72,6 +72,17 @@ class TableCursor {
     this._cursor.$v = this._table.element(ix).$v;
     this._cursorLinksTo = this._cursor.$updateTo(this._lastRec);
     this._tableLinksTo = this._lastRec.$updateTo(this._cursor);
+  }
+
+  setIndexOnRecord(rec) {
+    if (this.table instanceof ArrayTableVar) {
+      let ix = this.table.array.indexOf(rec);
+      if (ix !== -1) {
+        this.index.$v = ix;
+      }
+    } else {
+      console.error('setIndexOnRecord not supported on nome ArrayTableVar table');
+    }
   }
 
   setCursorType (recordType) {
