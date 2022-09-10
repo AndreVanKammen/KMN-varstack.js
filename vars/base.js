@@ -9,6 +9,7 @@ export class BaseDefinition {
     this._hash = ++globalHashCount; // Give every type definition a unique nr for hash-maps
     this.name = defaults?.name || '';
     this.type = defaults?.type || '';
+    this.screenWidth = defaults?.screenWidth || -1;
 
     this.directInput = defaults?.directInput || '';
     this.inputType = defaults?.inputType || '';
@@ -278,7 +279,7 @@ export class BaseBinding {
       throw "No baseVar supplied";
     }
     /** @type {BaseVar} baseVar */
-    this.baseVar = baseVar
+    this.baseVar = baseVar;
     this.changeEvent = undefined;
   }
 

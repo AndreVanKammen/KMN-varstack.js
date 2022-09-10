@@ -36,6 +36,7 @@ FloatVar.typeDefinition = new BaseDefinition({
   defVal: 0,
   showValue: true,
   inputType: 'range',
-  sortIsNumber: true
+  sortIsNumber: true,
+  screenWidth: 80
 });
 

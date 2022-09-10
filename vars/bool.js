@@ -49,6 +49,7 @@ BoolVar.parseStr= function(str, defaultValue) {
 
 BoolVar.typeDefinition = new BaseDefinition({
   type: 'Bool',
-  inputType: 'checkbox'
+  inputType: 'checkbox',
+  screenWidth: 40
 });
 

@@ -3,7 +3,7 @@
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import { Types } from '../varstack.js';
-import { BaseVar } from '../vars/base.js';
+import { BaseDefinition, BaseVar } from '../vars/base.js';
 import log from '../core/log.js';
 import { RecordVar } from './record.js';
 
@@ -34,6 +34,15 @@ class TableVar extends BaseVar {
 
   get keyFieldName () {
     return this.elementType.prototype._keyFieldName;
+  }
+  /** @type {BaseDefinition[]} */
+  get fieldDefs() {
+    return this.elementType.prototype._fieldDefs;
+  }
+
+  /** @type {string[]} */
+  get fieldNames() {
+    return this.elementType.prototype._fieldNames;
   }
 
   tableChanged() {
@@ -144,7 +153,7 @@ class TableVar extends BaseVar {
 
   toJSONArray() {
     let fieldNames = [];
-    for (let fieldDef of this.elementType.prototype._fieldDefs) {
+    for (let fieldDef of this.fieldDefs) {
       let fieldName = fieldDef.name;
       if (!fieldDef.noStore) {
         fieldNames.push(fieldName);
