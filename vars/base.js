@@ -162,6 +162,12 @@ export class BaseVar {
     }
   }
 
+  dispose() {
+    this._directCallbacks = null;
+    this._deferedCallbacks = null;
+    this._storeResolvers = null;
+  }
+
   $getStoredPromise () {
     this._storeResolvers = this._storeResolvers || [];
     return new Promise((resolve, reject) => {
