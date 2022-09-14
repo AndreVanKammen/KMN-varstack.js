@@ -1,5 +1,6 @@
 import defer from "../../KMN-utils.js/defer.js";
 import { ArrayTableVar } from "../structures/table.js";
+import { IntVar } from "../vars/int.js";
 import { Types } from "../varstack.js";
 
 
@@ -19,7 +20,7 @@ window.showProgress = function() {
   // let tbl = [];
   // for (let t of openTasks) {
   //   tbl.push({
-  //     nr: t.nr, 
+  //     nr: t.nr,
   //     'total(ms)': t.runTime,
   //     state: t._state,
   //     'time(ms)': t.stateTime,
@@ -45,7 +46,7 @@ export function getOpenTasksTable() {
   return _openTasksTable;
 }
 
-class TaskState {
+export class TaskState {
   constructor() {
     this.taskIx = -1;
     for (let ix = 0; ix < openTasks.length-1; ix++) {
@@ -90,9 +91,17 @@ class TaskState {
     this.state = 'disposing';
     this.stateRec.stopTime.$v = Date.now() / 1000.0;
     openTasks[this.taskIx] = null;
+    this.state = 'finished';
   }
 }
 
+/**
+ *
+ * @param {IntVar} limitVar
+ * @param {number} maxValue
+ * @param {(taskState: TaskState) => void} startTask
+ * @param {number} taskNr
+ */
 export function limitParralelTasks(limitVar, maxValue, startTask, taskNr) {
   const handleTask = () => {
     // Claim the task
