@@ -1,5 +1,5 @@
 // Copyright by André van Kammen
-// Licensed under CC BY-NC-SA 
+// Licensed under CC BY-NC-SA
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 
@@ -17,7 +17,7 @@ import { IntVar } from "../vars/int.js";
 class TableCursor {
 
   /**
-   * @param {T} recordTypeOrTable 
+   * @param {T} recordTypeOrTable
    */
   constructor (recordTypeOrTable) {
     /** @type {TableVar} */
@@ -59,7 +59,7 @@ class TableCursor {
     }
 
     let ix = indexVar.$v;
-    
+
     if (ix === -1) {
       // TODO set empty record values
       return
@@ -137,6 +137,12 @@ class TableCursor {
       this._index.$v = -1;
     }
     return this._index;
+  }
+
+  dispose() {
+    this._index.$v = -1;
+    this._index.dispose();
+    this._cursor.dispose();
   }
 }
 
