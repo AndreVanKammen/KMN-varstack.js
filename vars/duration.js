@@ -5,6 +5,9 @@ import { TimeVar } from "./time.js";
 // TODO: Add a string function that handles days like 3d 10 min 5 seconds or something like that
 export class DurationVar extends TimeVar {
   get $niceStr() {
+    if (this._value <= 0.0) {
+      return '-';
+    }
     if (this._value < 1.0) {
       return (this._value * 1000.0).toFixed((this._value < 100.0) ? 1 : 0) + 'ms';
     }
