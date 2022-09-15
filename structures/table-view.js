@@ -1,9 +1,10 @@
+import { IntVar } from "../vars/int.js";
 import { TableVar } from "./table.js";
 
 export class TableView {
   /**
-   * 
-   * @param {TableVar} table 
+   *
+   * @param {TableVar} table
    */
   constructor(table) {
     this.table = table;
@@ -12,6 +13,8 @@ export class TableView {
     this.sortInvalidated = true;
     this.sortArray = [];
     this.table.$addEvent(this.handleArrayChanged.bind(this));
+    this.sortChanged = new IntVar();
+    this.externalSortArray = false;
   }
 
   handleArrayChanged() {
@@ -19,10 +22,10 @@ export class TableView {
   }
 
   /**
-   * 
-   * @param {string} fieldName 
-   * @param {string | number} value1 
-   * @param {number} value2 
+   *
+   * @param {string} fieldName
+   * @param {string | number} value1
+   * @param {number} value2
    */
    setFilter(fieldName, value1, value2) {
     this.sortField = fieldName;
@@ -33,6 +36,7 @@ export class TableView {
     // @ts-ignore
     this.filterValue2 = Math.max(value1, value2);
     this.sortInvalidated = true;
+    this.sortChanged.$v++;
   }
 
   setSort(fieldName, ascending = undefined) {
@@ -40,23 +44,28 @@ export class TableView {
     if (this.sortField !== fieldName) {
       this.sortField = fieldName;
       this.sortInvalidated = true;
+      this.sortChanged.$v++;
     } else {
       this.sortAscending = !this.sortAscending;
       this.sortInvalidated = true;
+      this.sortChanged.$v++;
     }
     if (ascending !== undefined && this.sortAscending !== ascending) {
       this.sortAscending = ascending;
       this.sortInvalidated = true;
+      this.sortChanged.$v++;
     }
   }
 
   setSortArray(sortArray) {
     this.sortArray = sortArray;
+    this.externalSortArray = true;
     this.sortInvalidated = false;
+    this.sortChanged.$v++;
   }
 
   getSortArray() {
-    if (this.sortInvalidated) {
+    if (this.sortInvalidated && !this.externalSortArray) {
       this.sortArray = [];
       if (this.sortField === '') {
         for (let ix = 0; ix < this.table.length; ix++) {
