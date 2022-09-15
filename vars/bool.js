@@ -36,6 +36,10 @@ export class BoolVar extends BaseVar {
   get $niceStr() {
     return this._value ? 'yes' : 'no';
   }
+
+  $toggle() {
+    this.$v = !this.$v;
+  }
 }
 
 BoolVar.parseStr= function(str, defaultValue) {
