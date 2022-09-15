@@ -24,7 +24,7 @@ export class DateVar extends BaseVar {
           if (isNaN(y)) {
             log.error(`Invalid value (${x}) for DateVar`);
             return
-          } else 
+          } else
           newDate = new Date(y);
         } else {
           log.error(`Invalid value (${x}) for DateVar`);
@@ -46,9 +46,9 @@ export class DateVar extends BaseVar {
       let todayStr = (new Date()).toISOString().substring(2, 10);
       var dateStr = this._value.toISOString().substring(2, 10);
       if (todayStr === dateStr) {
-        return this._value.toLocaleString(undefined, { timeStyle: 'short' });
+        return 'today '+this._value.toLocaleTimeString(undefined, { timeStyle: 'short' });
       } else {
-        return this._value.toLocaleString(undefined, { dateStyle: 'short' });
+        return this._value.toLocaleDateString(undefined, { dateStyle: 'short' });
       }
     } else {
       return '-';
