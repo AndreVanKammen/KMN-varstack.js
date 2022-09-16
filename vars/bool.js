@@ -57,3 +57,40 @@ BoolVar.typeDefinition = new BaseDefinition({
   screenWidth: 40
 });
 
+export class BoolSelectVar extends BoolVar {
+  /**
+   *
+   * @param {BaseVar} baseVar
+   * @param {any} value
+   */
+  constructor(baseVar, value, unselectVal) {
+    super();
+    this.value = value;
+    this.unselectVal = unselectVal;
+    this.baseVar = baseVar;
+    this.baseEvent = this.baseVar.$addEvent((x) => {
+      console.log('select from base event: ',this.baseVar.$v, this.value);
+      this.$v = this.baseVar.$v == this.value;
+    });
+    this.$addEvent((b) => {
+      if (b.$v) {
+        console.log('set from bool event: ',this.baseVar ,this.baseVar.$v, this.value);
+        this.baseVar.$v = this.value;
+
+        // Always make sure our value is the right type for the basevar
+        this.value = this.baseVar.$v;
+      } else {
+        if (this.value === this.baseVar.$v) {
+          console.log('set from base event: ',this.baseVar.$v, this.unselectVal);
+          this.baseVar.$v = this.unselectVal;
+        }
+      }
+    });
+  }
+
+  dispose() {
+    this.baseVar.$removeEvent(this.baseEvent);
+    super.dispose();
+  }
+}
+
