@@ -20,6 +20,7 @@ export class EnumVar extends IntVar {
         super.$v = nr;
       } else {
         console.error('Invalid enum value: ', x);
+        super.$v = -1;
       }
     } else {
       super.$v = x;
