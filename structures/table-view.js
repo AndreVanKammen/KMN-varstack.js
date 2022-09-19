@@ -10,15 +10,18 @@ export class TableView {
     this.table = table;
     this.sortField = '';
     this.sortAscending = false;
-    this.sortInvalidated = true;
-    this.sortArray = [];
+    this.viewInvalidated = true;
+
+    this.preFilterArray = [];
+    this.viewArray = [];
+
     this.table.$addEvent(this.handleArrayChanged.bind(this));
-    this.sortChanged = new IntVar();
-    this.externalSortArray = false;
+    this.viewChanged = new IntVar();
+    this.hasPreFilter = false;
   }
 
   handleArrayChanged() {
-    this.sortInvalidated = true;
+    this.viewInvalidated = true;
   }
 
   /**
@@ -28,53 +31,62 @@ export class TableView {
    * @param {number} value2
    */
    setFilter(fieldName, value1, value2) {
-    this.sortField = fieldName;
     this.filterField = fieldName;
     this.filterValueStr = value1.toString();
     // @ts-ignore
     this.filterValue1 = Math.min(value1, value2);
     // @ts-ignore
     this.filterValue2 = Math.max(value1, value2);
-    this.sortInvalidated = true;
-    this.sortChanged.$v++;
+    this.viewInvalidated = true;
+    this.viewChanged.$v++;
   }
 
   setSort(fieldName, ascending = undefined) {
     console.log('set sort:', fieldName);
     if (this.sortField !== fieldName) {
+      this.sortAscending = false;
       this.sortField = fieldName;
-      this.sortInvalidated = true;
-      this.sortChanged.$v++;
     } else {
       this.sortAscending = !this.sortAscending;
-      this.sortInvalidated = true;
-      this.sortChanged.$v++;
     }
-    if (ascending !== undefined && this.sortAscending !== ascending) {
+    if (ascending !== undefined) {
       this.sortAscending = ascending;
-      this.sortInvalidated = true;
-      this.sortChanged.$v++;
     }
+    this.viewInvalidated = true;
+    this.viewChanged.$v++;
   }
 
-  setSortArray(sortArray) {
-    this.sortArray = sortArray;
-    this.externalSortArray = true;
-    this.sortInvalidated = false;
-    this.sortChanged.$v++;
+  setPreFilterArray(perFilterArray) {
+    if (perFilterArray) {
+      this.preFilterArray = perFilterArray;
+      this.hasPreFilter = true;
+    } else {
+      this.preFilterArray = null;
+      this.hasPreFilter = false;
+    }
+    this.viewInvalidated = true;
+    this.viewChanged.$v++;
   }
 
   getSortArray() {
-    if (this.sortInvalidated && !this.externalSortArray) {
-      this.sortArray = [];
-      if (this.sortField === '') {
-        for (let ix = 0; ix < this.table.length; ix++) {
-          this.sortArray.push(ix);
-        }
+    if (this.viewInvalidated) {
+      /** @type {number[]} */
+      let imputArray;
+      if (this.hasPreFilter) {
+        imputArray = this.preFilterArray;
       } else {
-        let tempArray = [];
+        imputArray = [];
         for (let ix = 0; ix < this.table.length; ix++) {
-          let val = this.table.element(ix)[this.sortField].$sortValue;
+          imputArray.push(ix);
+        }
+      }
+
+      let sortField = this.sortField || this.filterField;
+      let sortFieldIx = this.table.elementType.prototype._fieldNames.indexOf(sortField);
+      if (sortFieldIx !== -1) {
+        let tempArray = [];
+        for (let ix of imputArray) {
+          let val = this.table.element(ix)[sortField].$sortValue;
           if (this.filterField) {
             let fieldIx = this.table.elementType.prototype._fieldNames.indexOf(this.filterField);
             let recInFiltered = true;
@@ -99,22 +111,20 @@ export class TableView {
           }
         }
 
-
-        let fieldIx = this.table.elementType.prototype._fieldNames.indexOf(this.sortField);
-        if (fieldIx >= 0) {
-          let sortMultiplier = this.sortAscending ? -1 : 1;
-          if (this.table.elementType.prototype._fieldDefs[fieldIx].sortIsNumber) {
-            tempArray = tempArray.sort((a, b) => (a.val - b.val) * sortMultiplier);
-          } else {
-            tempArray = tempArray.sort((a, b) => a.val.localeCompare(b.val) * sortMultiplier)
-          }
-          for (let ix = 0; ix < tempArray.length; ix++) {
-            this.sortArray.push(tempArray[ix].ix)
-          }
+        let sortMultiplier = this.sortAscending ? -1 : 1;
+        if (this.table.elementType.prototype._fieldDefs[sortFieldIx].sortIsNumber) {
+          tempArray = tempArray.sort((a, b) => (a.val - b.val) * sortMultiplier);
+        } else {
+          tempArray = tempArray.sort((a, b) => a.val.localeCompare(b.val) * sortMultiplier)
         }
+
+        this.viewArray = tempArray.map(t => t.ix);
+      } else {
+        this.viewArray = imputArray;
       }
-      this.sortInvalidated = false;
+
+      this.viewInvalidated = false;
     }
-    return this.sortArray;
+    return this.viewArray;
   }
 }
