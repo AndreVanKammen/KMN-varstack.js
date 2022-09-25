@@ -1,3 +1,4 @@
+import { BaseDefinition } from "./base.js";
 import { FloatVar } from "./float.js";
 
 export class SizeVar extends FloatVar {
@@ -12,3 +13,13 @@ export class SizeVar extends FloatVar {
   }
 }
 
+SizeVar.typeDefinition = new BaseDefinition(
+  {
+    ...FloatVar.typeDefinition, ...{
+      range: [1, 1024],
+      step: 1.0,
+      type: 'Size',
+      precision: 0
+    }
+  }
+);

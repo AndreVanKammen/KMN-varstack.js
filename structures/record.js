@@ -1,5 +1,5 @@
 // Copyright by André van Kammen
-// Licensed under CC BY-NC-SA 
+// Licensed under CC BY-NC-SA
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import { BaseVar } from '../vars/base.js';
@@ -19,9 +19,22 @@ class RecordVar extends BaseVar {
     this._updateRunning = false;
   }
 
+  initializeRecord(fields) {
+    let fieldNames = [];
+    let fieldDefs = [];
+    for (let [name, v] of Object.entries(fields)) {
+      fieldNames.push(name);
+      fieldDefs.push(v.$varDefinition);
+    }
+    // @ts-ignore
+    this.myProto._fieldNames = fieldNames;
+    // @ts-ignore
+    this.myProto._fieldDefs = fieldDefs;
+  }
+
   /**
    * Do a callback for all the blobfields in this record
-   * @param {(name:string, v:BlobBaseVar) => void} callback 
+   * @param {(name:string, v:BlobBaseVar) => void} callback
    */
   $linkBlobFields(callback) {
     for (let ix = 0; ix < this.$fieldDefs.length; ix++) {
@@ -76,8 +89,8 @@ class RecordVar extends BaseVar {
   }
 
   /**
-   * 
-   * @param {string | string[]} pathToValue 
+   *
+   * @param {string | string[]} pathToValue
    * @returns {BaseVar}
    */
   $findVar(pathToValue) {
@@ -123,7 +136,7 @@ class RecordVar extends BaseVar {
 
   /**
    * Links all updates in this record to another record instance
-   * @param {RecordVar} targetRecord 
+   * @param {RecordVar} targetRecord
    * @returns {Array}
    */
   $updateTo(targetRecord) {
@@ -152,7 +165,7 @@ class RecordVar extends BaseVar {
 
   /**
    * Links all updates in this record to a javascript object
-   * @param {any} targetObject 
+   * @param {any} targetObject
    * @returns {Array}
    */
    $updateToObject(targetObject) {

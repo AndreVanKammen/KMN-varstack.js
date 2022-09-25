@@ -110,9 +110,9 @@ export class BaseVar {
   /** @type {string} */
   get $niceStr() {
     if (this.$v != null) {
-      //@ts-ignore 
+      //@ts-ignore
       if (this.constructor.$formatForScreen) {
-        //@ts-ignore 
+        //@ts-ignore
         return this.constructor.$formatForScreen(this);
       }
       return this.$v.toString()
@@ -187,7 +187,7 @@ export class BaseVar {
     this._storeResolvers = [];
   }
 
-  /** @type {import("../../../TS/data-model").AddEvent} */
+  /** @type {import('../TS/varstack.js').AddEvent} */
   $addEvent (callBack, initialize = false) {
     // re-use nulled version on larger lists
     if (this._directCallbacks.length>512) {

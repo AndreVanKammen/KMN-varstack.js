@@ -3,10 +3,10 @@ import { Types } from '../varstack.js';
 
 /** @type {typeof import('../TS/varstack').ColorRecord} */ // @ts-ignore
 const ColorRecord = Types.addRecord('ColorRecord', {
-  R: 'FloatVar',
-  G: 'FloatVar',
-  B: 'FloatVar',
-  A: 'FloatVar:defval>1.0'
+  R: 'Float',
+  G: 'Float',
+  B: 'Float',
+  A: 'Float:defval>1.0'
 });
 
 export class ColorVar extends ColorRecord {
@@ -38,6 +38,14 @@ export class ColorVar extends ColorRecord {
   }
   static fromRGBFloatArray(byteArray) {
     return this._fromRGBBArray(byteArray, 1);
+  }
+  static fromColorVar(clr) {
+    let result = new ColorVar();
+    result.R.$v = clr.R.$v;
+    result.G.$v = clr.G.$v;
+    result.B.$v = clr.B.$v;
+    result.A.$v = clr.A.$v;
+    return result;
   }
 }
 
