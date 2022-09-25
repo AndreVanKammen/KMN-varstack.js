@@ -25,6 +25,7 @@ class RecordVar extends BaseVar {
     for (let [name, v] of Object.entries(fields)) {
       fieldNames.push(name);
       fieldDefs.push(v.$varDefinition);
+      v.$addEvent(this._recordChangedBound);
     }
     // @ts-ignore
     this.myProto._fieldNames = fieldNames;
