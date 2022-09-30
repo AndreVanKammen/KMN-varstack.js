@@ -1,5 +1,5 @@
 // Copyright by André van Kammen
-// Licensed under CC BY-NC-SA 
+// Licensed under CC BY-NC-SA
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 import { Types } from '../varstack.js';
@@ -185,11 +185,11 @@ class TableVar extends BaseVar {
     }
   }
 
-  // These specific functions are place here so they can be optimized later on 
+  // These specific functions are place here so they can be optimized later on
   // by making them "to the point" we can later-on turn this into api's to the server or storage
   findFields(obj) {
     for (let ix = 0; ix < this.length; ix++) {
-      let elem = this.element(ix); 
+      let elem = this.element(ix);
       let match = true;
       for (let key in obj) {
         // TODO var base needs overridable compare function
@@ -235,7 +235,7 @@ class TableVar extends BaseVar {
   }
   /**
    * @param {String} fieldName - Element type of the array or the name of a field
-   * @param {any} value - Value to search for 
+   * @param {any} value - Value to search for
    * @returns {number}
    */
   findIx(fieldName, value) {
@@ -255,7 +255,7 @@ TableVar.isValueType = false;
 class ArrayTableVar extends TableVar {
   constructor () {
     super()
-  
+
     this.arrayChangeCount = 0;
     this.array = []
     // TODO write callback handler and use it in base and here it needs to re-use empty slots, this code does not
@@ -296,6 +296,32 @@ class ArrayTableVar extends TableVar {
     }
   }
 
+  move(rec, newIx) {
+    if (newIx < 0 || newIx >= this.array.length) {
+      log.error('Invalid index({newIx}) to move to!', { newIx });
+      return
+    }
+
+    const ix = this.array.indexOf(rec);
+    if (ix === newIx) {
+      return;
+    }
+
+    if (ix < newIx) {
+      for (let i = ix; i < newIx; i++) {
+        this.array[i] = this.array[i + 1];
+      }
+      this.array[newIx] = rec;
+    } else {
+      for (let i = ix; i > newIx; i--) {
+        this.array[i] = this.array[i - 1];
+      }
+      this.array[newIx] = rec;
+    }
+
+    this.handleArrayChanged();
+  }
+
   moveUp(rec) {
     let ix = this.array.indexOf(rec);
     if (ix<=0) {
@@ -307,7 +333,7 @@ class ArrayTableVar extends TableVar {
     this.array[ix] = swap;
     this.handleArrayChanged();
     // console.log('Move up ', ix, rec);
-  }  
+  }
 
   moveDown(rec) {
     let ix = this.array.indexOf(rec);
@@ -397,7 +423,7 @@ class ArrayTableVar extends TableVar {
   removeArrayChangeEvent (handle) {
     this._arrayChangedCallbacks[handle] = null
   }
-  
+
   restoreArray(restoreArray) {
     this.array = restoreArray;
     this.handleArrayChanged();
@@ -429,7 +455,7 @@ class ArrayTableVar extends TableVar {
     }
     return false;
   }
-  
+
   handleArrayChanged() {
     this.arrayChangeCount++;
     if (this.inUpdate > 0) {
