@@ -1,6 +1,6 @@
 //// @ts-nocheck
 // Copyright by André van Kammen
-// Licensed under CC BY-NC-SA 
+// Licensed under CC BY-NC-SA
 // https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 // TODO: Clean this up, it's messy
@@ -33,9 +33,9 @@ function classOf(typeToCheck, checkType) {
   return false;
 }
 /**
- * 
- * @param {string} definition 
- * @param {string} name 
+ *
+ * @param {string} definition
+ * @param {string} name
  * @returns {BaseDefinition}
  */
 export const parseVarDefinition = function (definition, name = undefined) {
@@ -57,7 +57,7 @@ export const parseVarDefinition = function (definition, name = undefined) {
 
   def.name = name;
   def.type = typeName;
-  
+
   def.range = definitions.filter(x => x.startsWith('range>'))[0]?.substring(6)?.split('..')?.map(x => Number.parseFloat(x)) || def.range;
   def.step = definitions.filter(x => x.startsWith('step>'))[0]?.substring(5) || def.step;
   let newDefVal = definitions.filter(x => x.startsWith('defval>'))[0]?.substring(7);
@@ -69,7 +69,7 @@ export const parseVarDefinition = function (definition, name = undefined) {
   def.precision = isFinite(precision) ? ~~(precision) : def.precision;
 
   def.isReadOnly = definitions.indexOf('ro') !== -1 || def.isReadOnly;
-  
+
   def.isKey = definitions.indexOf('key') !== -1;
   def.isValue = definitions.indexOf('value') !== -1;
   def.noStore = definitions.indexOf('nostore') !== -1;
@@ -106,7 +106,7 @@ const Types = {
       return;
     }
 
-    // TODO SECURITY: check name for injection or find better method for 
+    // TODO SECURITY: check name for injection or find better method for
     //                creating a dynamicly named class (Javascript Documentation is such a mess)
     let newClass = (new Function(`return function ${name}(...args) {
       let constructor;
@@ -120,7 +120,7 @@ const Types = {
       return Reflect.construct(constructor, args, new.target);
     }`))();
 
-    // Thanks to: 
+    // Thanks to:
     // https://medium.com/@robertgrosse/how-es6-classes-really-work-and-how-to-build-your-own-fd6085eb326a
     Reflect.setPrototypeOf(newClass, baseType);
     Reflect.setPrototypeOf(newClass.prototype, baseType.prototype);
@@ -136,11 +136,11 @@ const Types = {
   },
 
   addRecord: function (name, recordDef) {
-    // TODO SECURITY: check name or find better method for 
+    // TODO SECURITY: check name or find better method for
     //                creating a dynamicly named class (Javascript Documentation is such a mess)
     // let newClass = (new Function(`return class ${name} {}`))();
 
-    // // Thanks to: 
+    // // Thanks to:
     // // https://medium.com/@robertgrosse/how-es6-classes-really-work-and-how-to-build-your-own-fd6085eb326a
     // Reflect.setPrototypeOf(newClass, RecordVar);
     // Reflect.setPrototypeOf(newClass.prototype, RecordVar.prototype);
@@ -344,7 +344,6 @@ const Types = {
                   }
                 };
                 lookupVar.$addDeferedEvent(updateValue, true);
-                
               }
               return privateVar;
             },

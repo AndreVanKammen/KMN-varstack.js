@@ -144,7 +144,11 @@ export class BaseVar {
     // console.log('Value changed', this.constructor.name, this._parent?.constructor.name, '"' + fullName + '"');
     for (const callBack of this._directCallbacks) {
       if (callBack) {
-        callBack(this);
+        try {
+          callBack(this);
+        } catch (ex) {
+          console.error('Error handling value changed: ', callBack, ex);
+        }
       }
     }
     if (this._deferedCallbacks.length>0 && !this._deferedSceduled) {
@@ -157,7 +161,11 @@ export class BaseVar {
     this._deferedSceduled = false;
     for (const callBack of this._deferedCallbacks) {
       if (callBack) {
-        callBack(this);
+        try {
+          callBack(this);
+        } catch (ex) {
+          console.error('Error handling value changed deferred: ', callBack, ex);
+        }
       }
     }
   }
