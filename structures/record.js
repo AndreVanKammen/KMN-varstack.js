@@ -64,14 +64,14 @@ class RecordVar extends BaseVar {
     // return result;
   }
 
-  toObject () {
+  toObject() {
     let result = {}
     for (let ix = 0; ix < this.$fieldDefs.length; ix++) {
       // for (let fieldDef of this.$fieldDefs) {
       let fieldDef = this.$fieldDefs[ix];
       let fieldName = this.$fieldNames[ix]; // fieldDef.name; subrecords have a different name
 
-      if (fieldName.indexOf('.')===-1 && !fieldDef.noStore && fieldName === this.$fieldNames[ix]) {// don't store fields of subrecords here
+      if (fieldName.indexOf('.') === -1 && !fieldDef.noStore && fieldName === this.$fieldNames[ix]) {// don't store fields of subrecords here
         const objVar = this[fieldName];
         if (!objVar.constructor.isBlob) {
           if (objVar.toObject) {
@@ -169,7 +169,7 @@ class RecordVar extends BaseVar {
    * @param {any} targetObject
    * @returns {Array}
    */
-   $updateToObject(targetObject) {
+  $updateToObject(targetObject) {
     let linksTo = []
     for (let fieldName of this.$fieldNames) {
       linksTo.push(
@@ -234,6 +234,13 @@ class RecordVar extends BaseVar {
   get $fieldDefs() {
     // @ts-ignore: I need this to be on the inherited class, not on the base then everything would be the same
     return this.myProto._fieldDefs;
+  }
+  get $niceStr() {
+    let result  = '';
+    for (let x of this.$fieldNames) {
+      result += '  ' + x + ': \t' + this[x].$niceStr + '\n';
+    }
+    return result;
   }
 }
 RecordVar.isValueType = false;

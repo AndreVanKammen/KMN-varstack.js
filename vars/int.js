@@ -26,6 +26,9 @@ export class IntVar extends BaseVar {
       this._valueChanged();
     }
   }
+  get $niceStr() {
+    return this._value.toLocaleString();
+  }
 }
 
 IntVar.typeDefinition = new BaseDefinition({
