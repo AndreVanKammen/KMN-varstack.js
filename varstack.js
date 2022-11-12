@@ -174,7 +174,7 @@ const Types = {
                 const definitionVar = this.$findVar(fieldDef.defRef);
                 this[privateName+'_def'] = definitionVar;
                 const createValueVar = () => {
-                  const fieldDef2 = parseVarDefinition(definitionVar.$v, publicName);
+                  const fieldDef2 = parseVarDefinition(definitionVar.$v || fieldDef.type, publicName);
                   let typeToMake = Types[fieldDef2.type];
                   let value = this[privateName];
                   let oldValue;
