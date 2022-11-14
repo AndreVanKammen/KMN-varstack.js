@@ -24,6 +24,7 @@ export interface ArrayTableVarG<T extends RecordVar> extends ArrayTableVar {
   $addEvent<T>(this: T, callBack: (v: T) => void): number;
   findFields(search: any): T;
   find(fieldName: string, value: any): T;
+  findOrAdd(fieldName: string, value: any): T;
   add(arrayElement: any): T;
   element(ix: number): T;
   [Symbol.iterator](): IterableIterator<T>;

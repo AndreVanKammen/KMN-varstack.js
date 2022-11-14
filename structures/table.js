@@ -213,6 +213,14 @@ class TableVar extends BaseVar {
     }
   }
 
+  findOrAdd(fieldName, value) {
+    let rec = this.find(fieldName, value);
+    if (!rec) {
+      rec = this.add({ [fieldName]: value });
+    }
+    return rec;
+  }
+
   async findKeyAsync(keyValue) {
     let result = this.find(this.keyFieldName, keyValue);
     if (!result) {
