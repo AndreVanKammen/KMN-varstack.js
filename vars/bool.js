@@ -74,14 +74,14 @@ export class BoolSelectVar extends BoolVar {
     });
     this.$addEvent((b) => {
       if (b.$v) {
-        console.log('set from bool event: ',this.baseVar ,this.baseVar.$v, this.value);
+        // console.log('set from bool event: ',this.baseVar ,this.baseVar.$v, this.value);
         this.baseVar.$v = this.value;
 
         // Always make sure our value is the right type for the basevar
         this.value = this.baseVar.$v;
       } else {
         if (this.value === this.baseVar.$v) {
-          console.log('set from base event: ',this.baseVar.$v, this.unselectVal);
+          // console.log('set from base event: ',this.baseVar.$v, this.unselectVal);
           this.baseVar.$v = this.unselectVal;
         }
       }
