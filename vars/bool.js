@@ -69,7 +69,7 @@ export class BoolSelectVar extends BoolVar {
     this.unselectVal = unselectVal;
     this.baseVar = baseVar;
     this.baseEvent = this.baseVar.$addEvent((x) => {
-      console.log('select from base event: ',this.baseVar.$v, this.value);
+      // console.log('select from base event: ',this.baseVar.$v, this.value);
       this.$v = this.baseVar.$v == this.value;
     });
     this.$addEvent((b) => {
