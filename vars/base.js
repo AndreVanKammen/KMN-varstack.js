@@ -43,6 +43,7 @@ export class BaseVar {
   _varDefinition = null;
   _parent = null;
   _changeMonitor = null;
+  _isLoading = 0;
   // _value = undefined;
 
   constructor () {
@@ -174,6 +175,28 @@ export class BaseVar {
     this._directCallbacks = null;
     this._deferedCallbacks = null;
     this._storeResolvers = null;
+  }
+
+  get $isLoading() {
+    let search = this;
+    while (search) {
+      if (search._isLoading > 0) {
+        return true;
+      }
+      search = search._parent;
+    }
+    return false;
+  }
+
+  $beginLoading() {
+    this._isLoading++;
+  }
+
+  $endLoading() {
+    if (--this._isLoading < 0) {
+      console.error('endLoading without begin loading!');
+      this._isLoading = 0;
+    }
   }
 
   $getStoredPromise () {

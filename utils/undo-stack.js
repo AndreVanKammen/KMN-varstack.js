@@ -22,18 +22,28 @@ class UndoBlock {
     this.oldArrays = new Map();
   }
 }
+class ChangeRecord {
+
+  fromLoading = false;
+  /** @type {BaseVar} */
+  changedVar = null;
+  constructor(changedVar, fromLoading) {
+    this.changedVar = changedVar;
+    this.fromLoading = fromLoading;
+  }
+}
 
 export class UndoStack {
   constructor() {
     /** @type {Map<number,RestoreValueRec>} */
     this.cachedValues = new Map();
-    /** @type {Map<number,BaseVar>} */
+    /** @type {Map<number,ChangeRecord>} */
     this.changeList = new Map();
     /** @type {UndoBlock[]} */
     this.undoStack = [];
 
     this.changeSceduled = false;
-    this.showChangesBound = this.handleChanges.bind(this);
+    this.handleChangesBound = this.handleChanges.bind(this);
     this.isLoading = true;
   }
 
@@ -73,7 +83,10 @@ export class UndoStack {
 
   handleChanges() {
     let undoBlock = new UndoBlock();
-    for (let v of this.changeList.values()) {
+    let changeCount = 0;
+    for (let changeRec of this.changeList.values()) {
+      const v = changeRec.changedVar;
+      changeCount++;
       /** @type {typeof BaseVar} */ // @ts-ignore You don' t get it typescript? constructor === class type
       let varClass = v.constructor;
       let cacheRec = this.cachedValues.get(v._hash);
@@ -91,6 +104,9 @@ export class UndoStack {
             this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
             return x._hash;
           })];
+          if (!this.isLoading && !changeRec.fromLoading) {
+            //debugger
+          }
           let isSame = cacheRec.oldValue.length === newValue.length;
           if (isSame) {
             for (let ix = 1; ix < newValue.length; ix++) {
@@ -103,9 +119,9 @@ export class UndoStack {
             //   console.log('Array didnt change: ', v.$getFullName(), cacheRec, '=>', newValue);
             // }
           }
-          if (!this.isLoading && !isSame) {
+          if (!this.isLoading && !changeRec.fromLoading && !isSame) {
             undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: cacheRec.oldValue });
-            // console.log('Array change: ', v.$getFullName(), cacheRec.oldValue.slice(0), '=>', newValue);
+            // console.log('Array change: ', changeRec.fromLoading, v.$isLoading, v.$getFullName(), cacheRec.oldValue.slice(0), '=>', newValue);
           }
           cacheRec.oldValue = newValue;
         }
@@ -115,14 +131,15 @@ export class UndoStack {
       // console.log('Stored undo: ', undoBlock);
       this.undoStack.push(undoBlock);
     }
-    
+    console.log('Unddostack changes: ', changeCount);
+
     this.changeSceduled = false;
     this.changeList = new Map();
   }
 
   /**
-   * 
-   * @param {BaseVar} rootVar 
+   *
+   * @param {BaseVar} rootVar
    */
   addVarTree(rootVar) {
     rootVar._changeMonitor = this;
@@ -147,10 +164,24 @@ export class UndoStack {
     if (this.inUndo) {
       return;
     }
-    this.changeList.set(changedVar._hash, changedVar);
+    // if (changedVar.constructor.isArrayType) {
+    //   if (changedVar.$getFullName().indexOf('mixMap') !== -1) {
+    //     debugger;
+    //   }
+    // }
+    const isLoading = changedVar.$isLoading || this.isLoading;
+    let cr = this.changeList.get(changedVar._hash);
+    if (cr) {
+      if (isLoading) {
+        cr.fromLoading = true;
+      }
+    } else {
+      cr = new ChangeRecord(changedVar, isLoading);
+      this.changeList.set(changedVar._hash, cr);
+    }
     if (!this.changeSceduled) {
       this.changeSceduled = true;
-      setTimeout(this.showChangesBound,1000);
+      setTimeout(this.handleChangesBound,1000);
     }
   }
 }
