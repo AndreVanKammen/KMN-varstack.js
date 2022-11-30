@@ -92,7 +92,7 @@ export class UndoStack {
       let cacheRec = this.cachedValues.get(v._hash);
       let newValue = v.$v;
       if (varClass.isValueType) {
-        if (!this.isLoading) {
+        if (!this.isLoading && !changeRec.fromLoading) {
           undoBlock.oldValues.set(v._hash, { v, oldValue: cacheRec.oldValue });
         }
         cacheRec.oldValue = newValue;
@@ -104,9 +104,6 @@ export class UndoStack {
             this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
             return x._hash;
           })];
-          if (!this.isLoading && !changeRec.fromLoading) {
-            //debugger
-          }
           let isSame = cacheRec.oldValue.length === newValue.length;
           if (isSame) {
             for (let ix = 1; ix < newValue.length; ix++) {
@@ -128,10 +125,10 @@ export class UndoStack {
       }
     }
     if (undoBlock.oldValues.size || undoBlock.oldArrays.size) {
-      // console.log('Stored undo: ', undoBlock);
+      console.log('Stored undo: ', undoBlock);
       this.undoStack.push(undoBlock);
     }
-    console.log('Unddostack changes: ', changeCount);
+    // console.log('Undostack changes: ', changeCount);
 
     this.changeSceduled = false;
     this.changeList = new Map();
