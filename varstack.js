@@ -324,8 +324,9 @@ const Types = {
                 let lastLookUpEvent = -1;
                 const updateValue = async () => {
                   let lookupRecord = lookupTable.find(lookupField, lookupVar.$v);
+                  const privateLookUpField = this[privatelookupName];
 
-                  this[privatelookupName].$clearUpdateTo(lastUpdateToLookupLinks);
+                  privateLookUpField.$clearUpdateTo(lastUpdateToLookupLinks);
                   lastUpdateFromLookup?.$clearUpdateTo(lastUpdateFromLinks);
 
                   if (lookupRecord) {
@@ -333,9 +334,11 @@ const Types = {
                       lookupTable.$removeEvent(lastLookUpEvent);
                       lastLookUpEvent = -1;
                     }
-                    this[privatelookupName].$v = lookupRecord;
-                    lastUpdateToLookupLinks = this[privatelookupName].$updateTo(lookupRecord);
-                    lastUpdateFromLinks = lookupRecord.$updateTo(this[privatelookupName]);
+                    privateLookUpField.$beginLoading();
+                    privateLookUpField.$v = lookupRecord;
+                    privateLookUpField.$endLoading();
+                    lastUpdateToLookupLinks = privateLookUpField.$updateTo(lookupRecord);
+                    lastUpdateFromLinks = lookupRecord.$updateTo(privateLookUpField);
                     lastUpdateFromLookup = lookupRecord;
                   } else {
                     if (lastLookUpEvent === -1) {
