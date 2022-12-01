@@ -69,9 +69,12 @@ class TableCursor {
       return;
     }
     this._lastRec = this._table.element(ix);
-    this._cursor.$beginLoading();
-    this._cursor.$v = this._table.element(ix).$v;
-    this._cursor.$endLoading();
+    try {
+      this._cursor.$beginLoading();
+      this._cursor.$v = this._table.element(ix).$v;
+    } finally {
+      this._cursor.$endLoading();
+    }
     this._cursorLinksTo = this._cursor.$updateTo(this._lastRec);
     this._tableLinksTo = this._lastRec.$updateTo(this._cursor);
   }

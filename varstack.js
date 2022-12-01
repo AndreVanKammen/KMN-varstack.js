@@ -334,9 +334,12 @@ const Types = {
                       lookupTable.$removeEvent(lastLookUpEvent);
                       lastLookUpEvent = -1;
                     }
-                    privateLookUpField.$beginLoading();
-                    privateLookUpField.$v = lookupRecord;
-                    privateLookUpField.$endLoading();
+                    try {
+                      privateLookUpField.$beginLoading();
+                      privateLookUpField.$v = lookupRecord;
+                    } finally {
+                      privateLookUpField.$endLoading();
+                    }
                     lastUpdateToLookupLinks = privateLookUpField.$updateTo(lookupRecord);
                     lastUpdateFromLinks = lookupRecord.$updateTo(privateLookUpField);
                     lastUpdateFromLookup = lookupRecord;

@@ -41,6 +41,7 @@ export class UndoStack {
     this.changeList = new Map();
     /** @type {UndoBlock[]} */
     this.undoStack = [];
+    this.onNewUndo = () => { }; // For debug puprposes
 
     this.changeSceduled = false;
     this.handleChangesBound = this.handleChanges.bind(this);
@@ -67,31 +68,53 @@ export class UndoStack {
     }
     this.inUndo = true;
     for (let cacheRec of undoBlock.oldValues.values()) {
+      cacheRec.v.$beginLoading();
       cacheRec.v.$v = cacheRec.oldValue;
       this.cachedValues.set(cacheRec.v._hash, cacheRec);
+      cacheRec.v.$endLoading();
     }
     for (let cacheRec of undoBlock.oldArrays.values()) {
       let newArray = [];
+      cacheRec.v.$beginLoading();
       for (let ix = 1; ix < cacheRec.oldValue.length; ix++) {
         newArray.push(this.cachedValues.get(cacheRec.oldValue[ix]).v);
       }
       cacheRec.v.restoreArray(newArray);
+      cacheRec.v.$endLoading();
       this.cachedValues.set(cacheRec.v._hash, cacheRec);
     }
     this.inUndo = false;
+    this.onNewUndo();
+  }
+  /**
+   *
+   * @param {ArrayTableVar} atv
+   * @param {Boolean} updateCache
+   * @returns {Number[]}
+   */
+  getArrayHashes(atv, updateCache = false) {
+    return [atv.arrayChangeCount, ...atv.array.map(x => {
+      if (updateCache) {
+        this.cachedValues.set(x._hash, { v: x, oldValue: x.$v });
+      }
+      return x._hash;
+    })];
   }
 
   /**
    * @param {ArrayTableVar} atv
+   * @param {Boolean} updateCacheRec
    * @param {RestoreValueRec} cacheRec
    */
-  checkArrayChanged(atv, cacheRec = null) {
+  checkArrayChanged(atv, updateCacheRec, cacheRec = null) {
+    // let storeChange = cacheRec !== null;
     cacheRec = cacheRec || this.cachedValues.get(atv._hash);
     if (cacheRec && cacheRec[0] !== atv.arrayChangeCount) {
-      let newValue = [atv.arrayChangeCount, ...atv.array.map(x => {
-        this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
-        return x._hash;
-      })];
+      let newValue = this.getArrayHashes(atv, true);
+      // let newValue = [atv.arrayChangeCount, ...atv.array.map(x => {
+      //   this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
+      //   return x._hash;
+      // })];
       let isSame = cacheRec.oldValue.length === newValue.length;
       if (isSame) {
         for (let ix = 1; ix < newValue.length; ix++) {
@@ -105,7 +128,9 @@ export class UndoStack {
       //   console.log('Old: ', [...cacheRec.oldValue]);
       //   console.log('New: ', [...newValue]);
       // }
-      cacheRec.oldValue = newValue;
+      if (updateCacheRec) {
+        cacheRec.oldValue = newValue;
+      }
       return !isSame;
     }
     return false;
@@ -113,10 +138,8 @@ export class UndoStack {
 
   handleChanges() {
     let undoBlock = new UndoBlock();
-    let changeCount = 0;
     for (let changeRec of this.changeList.values()) {
       const v = changeRec.changedVar;
-      changeCount++;
       /** @type {typeof BaseVar} */ // @ts-ignore You don' t get it typescript? constructor === class type
       let varClass = v.constructor;
       let cacheRec = this.cachedValues.get(v._hash);
@@ -129,9 +152,14 @@ export class UndoStack {
       } else if (varClass.isArrayType) {
         /** @type {ArrayTableVar} */ // @ts-ignore
         let atv = v;
-        if (this.checkArrayChanged(atv, cacheRec)) {
+        let isLoading = !this.isLoading && !changeRec.fromLoading;
+        let oldValueArray = cacheRec.oldValue;
+        // if (isLoading) {
+        //   console.log('!!!!!!!!!!!!!!!!!!!NOOOOOOOOOOOOOO!!!!!!!!!!!!!!!!!!');
+        // }
+        if (this.checkArrayChanged(atv, isLoading, cacheRec)) {
           if (!this.isLoading && !changeRec.fromLoading) {
-            undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: cacheRec.oldValue });
+            undoBlock.oldArrays.set(v._hash, { v: atv, oldValue: oldValueArray });
             // console.log('Array change: ', changeRec.fromLoading, v.$isLoading, v.$getFullName(), cacheRec.oldValue.slice(0), '=>', newValue);
           }
         }
@@ -140,8 +168,8 @@ export class UndoStack {
     if (undoBlock.oldValues.size || undoBlock.oldArrays.size) {
       console.log('Stored undo: ', undoBlock);
       this.undoStack.push(undoBlock);
+      this.onNewUndo();
     }
-    // console.log('Undostack changes: ', changeCount);
 
     this.changeSceduled = false;
     this.changeList = new Map();
@@ -176,9 +204,11 @@ export class UndoStack {
     }
     const isLoading = changedVar.$isLoading || this.isLoading;
     if (changedVar.constructor.isArrayType) {
-      if (changedVar instanceof ArrayTableVar && this.checkArrayChanged(changedVar) && !isLoading) {
+      if (changedVar instanceof ArrayTableVar && this.checkArrayChanged(changedVar, isLoading) && !isLoading) {
         console.log('Array change: ', changedVar.$getFullName(), changedVar);
         // debugger;
+      } else {
+        return
       }
     }
     let cr = this.changeList.get(changedVar._hash);
