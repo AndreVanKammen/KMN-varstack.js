@@ -205,7 +205,7 @@ export class UndoStack {
     const isLoading = changedVar.$isLoading || this.isLoading;
     if (changedVar.constructor.isArrayType) {
       if (changedVar instanceof ArrayTableVar && this.checkArrayChanged(changedVar, isLoading) && !isLoading) {
-        console.log('Array change: ', changedVar.$getFullName(), changedVar);
+        // console.log('Array change: ', changedVar.$getFullName(), changedVar);
         // debugger;
       } else {
         return
