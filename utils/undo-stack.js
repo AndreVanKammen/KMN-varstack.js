@@ -93,12 +93,23 @@ export class UndoStack {
    * @returns {Number[]}
    */
   getArrayHashes(atv, updateCache = false) {
-    return [atv.arrayChangeCount, ...atv.array.map(x => {
+    let arr = new Array(atv.array.length + 1);
+    arr[0] = atv.arrayChangeCount;
+    for (let ix = 0; ix < atv.array.length; ix++) {
+      const x = atv.array[ix];
       if (updateCache) {
         this.cachedValues.set(x._hash, { v: x, oldValue: x.$v });
       }
-      return x._hash;
-    })];
+      arr[ix + 1] = x._hash;
+    }
+    return arr;
+
+    // return [atv.arrayChangeCount, ...atv.array.map(x => {
+    //   if (updateCache) {
+    //     this.cachedValues.set(x._hash, { v: x, oldValue: x.$v });
+    //   }
+    //   return x._hash;
+    // })];
   }
 
   /**
@@ -109,26 +120,18 @@ export class UndoStack {
   checkArrayChanged(atv, updateCacheRec, cacheRec = null) {
     // let storeChange = cacheRec !== null;
     cacheRec = cacheRec || this.cachedValues.get(atv._hash);
-    if (cacheRec && cacheRec[0] !== atv.arrayChangeCount) {
-      let newValue = this.getArrayHashes(atv, true);
-      // let newValue = [atv.arrayChangeCount, ...atv.array.map(x => {
-      //   this.cachedValues.set(x._hash, { v:x, oldValue: x.$v });
-      //   return x._hash;
-      // })];
-      let isSame = cacheRec.oldValue.length === newValue.length;
+    if (cacheRec && cacheRec.oldValue[0] !== atv.arrayChangeCount) {
+      let isSame = (cacheRec.oldValue.length - 1) === atv.array.length;
       if (isSame) {
-        for (let ix = 1; ix < newValue.length; ix++) {
-          if (cacheRec.oldValue[ix] !== newValue[ix]) {
+        for (let ix = 1; ix < atv.array.length; ix++) {
+          if (cacheRec.oldValue[ix] !== atv.array[ix - 1]._hash) {
             isSame = false;
             break;
           }
         }
       }
-      // if (!isSame && !this.isLoading) {
-      //   console.log('Old: ', [...cacheRec.oldValue]);
-      //   console.log('New: ', [...newValue]);
-      // }
-      if (updateCacheRec) {
+      if (updateCacheRec && !isSame) {
+        let newValue = this.getArrayHashes(atv, true);
         cacheRec.oldValue = newValue;
       }
       return !isSame;
