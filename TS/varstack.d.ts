@@ -1,6 +1,12 @@
 import { RecordVar } from "../structures/record";
 import { ArrayTableVar } from "../structures/table";
+import { BaseVar } from "../vars/base";
+import { BoolVar } from "../vars/bool";
+import { DurationVar } from "../vars/duration";
 import { FloatVar } from "../vars/float";
+import { IntVar } from "../vars/int";
+import { StringVar } from "../vars/string";
+import { TimeVar } from "../vars/time";
 
 export type AddEvent = <T>(this: T, callBack: (T) => void, initialize?: Boolean) => number;
 
@@ -48,3 +54,22 @@ export class ColorRecord extends RecordVar {
 export type ColorPalette = ArrayTableVarG<ColorRecord>;
 
 
+export interface VarStackTypes {
+  main: RecordVar;
+  Int: typeof IntVar;
+  Float: typeof FloatVar;
+  Bool: typeof BoolVar;
+  String: typeof StringVar;
+  Duration: typeof DurationVar;
+  Time: typeof TimeVar;
+  // @ ts-expect-error
+  add(type: typeof BaseVar);
+  // @ ts-expect-error
+  addNamedType(name: string, baseType: typeof BaseVar) : any;
+  // @ ts-expect-error
+  addRecord(name: string, recordDef: Record<string,string>);
+  // @ ts-expect-error
+  addArray(name: string, elementType: string);
+  // @ts-expect-error
+  [k:string]: typeof any
+}

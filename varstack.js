@@ -85,7 +85,7 @@ export const parseVarDefinition = function (definition, name = undefined) {
 }
 
 
-/** @type {import('../../TS/vastack').VarStackTypes} */
+/** @type {import('./TS/varstack.js').VarStackTypes} */
 const Types = {
   main: undefined,
   Int: IntVar,
